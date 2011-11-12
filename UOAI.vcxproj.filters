@@ -1,0 +1,295 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{69a6c51c-1411-45e5-84f7-7f7a88e66e84}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\libdisasm_sources">
+      <UniqueIdentifier>{770a43b8-4774-4797-9146-cf507dca20fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{8a962fc2-b8f6-4849-8ad1-e33cd2d51cf6}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Header Files\libdisasm_headers">
+      <UniqueIdentifier>{0656aaa9-6912-4d2d-adfa-3d4051d19378}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{f8da1d3b-2668-4b6e-b8a8-0d9afc6d8932}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libdisasm\ia32_implicit.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_insn.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_invariant.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_modrm.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_opcode_tables.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_operand.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_reg.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\ia32_settings.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_disasm.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_format.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_imm.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_insn.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_misc.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="libdisasm\x86_operand_list.c">
+      <Filter>Source Files\libdisasm_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="allocation.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asmCallibration.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Assembler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryHeap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryTree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COMBase.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COMInits.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="COMInjector.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="consolemagic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Error.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Injection.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkedList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OnInjection.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PE.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Streams.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StructDispatch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sync.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Trie.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UAC.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UOAI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UOCallibrations.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="UOAI.idl">
+      <Filter>Source Files</Filter>
+    </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libdisasm\ia32_implicit.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_insn.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_invariant.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_modrm.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_opcode_tables.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_operand.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_reg.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\ia32_settings.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\inttypes.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\libdisasm.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\qword.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\stdint.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\x86_imm.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libdisasm\x86_operand_list.h">
+      <Filter>Header Files\libdisasm_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="allocation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="asmCallibration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Assembler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryTree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="COMBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="COMInits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="COMInjector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="consolemagic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Injection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OnInjection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Streams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Trie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UAC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOAI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOCallibrations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOGump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOJournal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UOMacros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UONetwork.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Features.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UOAIResources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="UOAI.def">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Debug\UOAI.tlb" />
+  </ItemGroup>
+</Project>

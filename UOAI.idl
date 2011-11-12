@@ -1,0 +1,83 @@
+[uuid(61937D8B-BBCE-48b0-8ADF-F03C9443C7F2), version(1.0), helpstring("UOAI v1.0"), lcid(0)]
+library UOAI
+{
+	importlib("STDOLE2.TLB");
+
+	[uuid(BFC0EE0A-2B29-41d9-83DA-4B6B61EF54F9), helpstring("Ultima Online Client")]
+	coclass Client
+	{
+		[default] interface ClientInterface;
+		[source, default] interface ClientEventInterface;
+	}
+	
+	[uuid(BE02C37F-111E-402e-9D05-621C3D328724), helpstring("List of running Ultima Online Clients")]
+	coclass ClientList
+	{
+		[default] interface ClientListInterface;
+		[source, default] interface ClientListEventInterface;
+	}
+	
+	[uuid(8A11E500-2101-4a27-BB16-5498C28F91DA), helpstring("Ultima Online Automation Tools")]
+	coclass UOAI
+	{
+		[default] interface UOAIInterface;
+	}
+
+	[uuid(B25FAAF7-C0AA-4007-8C85-7693E02D59F0), helpstring("Injects UOAI into running clients [internal use only]")]
+	coclass COMInjector
+	{
+		[default] interface COMInjectorInterface;
+	}
+
+	[uuid(CD10E6BE-FDEE-4d59-A812-6FD08C02E8CE), dual, oleautomation, hidden, nonextensible]
+	interface UOAIInterface : IDispatch
+	{
+		[id(1), propget] HRESULT Clients([out, retval] ClientList ** clients);
+		[id(2), propget] HRESULT ClientWindowName([out, retval] BSTR * ClientWindowName);
+		[id(2), propput] HRESULT ClientWindowName([in] BSTR ClientWindowName);
+		[id(3), propget] HRESULT ClientPath([out, retval] BSTR * strClientPath);
+		[id(3), propput] HRESULT ClientPath([in] BSTR strClientPath);
+		[id(4), propget] HRESULT ClientExe([out, retval] BSTR * strClientExe);
+		[id(4), propput] HRESULT ClientExe([in] BSTR strClientExe);
+		[id(5)] HRESULT LaunchClient([out] Client ** pClient, [in, defaultvalue(-1)] VARIANT_BOOL bApplyMultiClientPatch, [in, defaultvalue(0)] VARIANT_BOOL bApplyEncryptionPatch, [out, retval] VARIANT_BOOL * bSuccess);
+	}
+	
+	[uuid(39FB3C1B-EF1F-4e30-AF63-83CB91B9FFA8), dual, oleautomation, hidden, nonextensible]
+	interface ClientListInterface : IDispatch
+	{
+		[id(1), propget] HRESULT Count([out, retval] long * clientcount);
+		[id(DISPID_VALUE), propget] HRESULT Client([in] long index, [out, retval] Client ** client);
+		[id(2)] HRESULT RegisterClient([in] IUnknown * pClientDisp);
+		[id(3)] HRESULT UnregisterClient([in] IUnknown * pClientDisp);
+		[id(DISPID_NEWENUM), propget] HRESULT NewEnum([out, retval] IUnknown ** newenum);
+		[id(4)] HRESULT FindClient([in] int pid, [out] Client ** client, [out, retval] VARIANT_BOOL * success);
+	}
+
+	[uuid(B327CDFD-2742-42c7-A781-5084EE06DCDC), hidden, nonextensible]
+	interface ClientListEventInterface : IDispatch
+	{
+		[id(1)] HRESULT OnNewClient([in]Client * new_client);
+		[id(2)] HRESULT OnClientClose([in]Client * closing_client);
+	}
+
+	[uuid(45A784D5-0E63-49c9-ACBA-46E4EDBD7D29), dual, oleautomation, hidden, nonextensible]
+	interface ClientInterface : IDispatch
+	{
+		[id(1), propget] HRESULT PID([out, retval] long * pPID);
+		[id(2)] HRESULT Message([in] int color, [in] int font, [in] BSTR message);
+		[id(3)] HRESULT Bark([in] BSTR message);
+		[id(4)] HRESULT ShowYesNoGump([in] BSTR question);
+	}
+
+	[uuid(EC60659C-611F-467c-B1F8-2CDB15BD257E), hidden, nonextensible]
+	interface ClientEventInterface : IDispatch
+	{
+		[id(1)] HRESULT OnClose([in]Client * closing_client);
+	}
+
+	[uuid(486EC9D9-5FC9-469a-B50A-4EE7F758E0D3), dual, oleautomation, hidden, nonextensible]
+	interface COMInjectorInterface : IDispatch
+	{
+		[id(1)] HRESULT Initialize([in] BSTR window_class_name, [in] long parameter);
+	}
+}
