@@ -1,0 +1,8 @@
+#include "resource.h"
+
+1 typelib Debug\UOAI.tlb
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_APPNAME             "UOAI"
+END

@@ -8,6 +8,8 @@
 #include "Assembler.h"
 #include <Windows.h>
 #include "BinaryTree.h"
+#include "asmCallibration.h"
+
 
 typedef struct
 {
@@ -121,12 +123,13 @@ int __stdcall internal_hook(unsigned int hookkey)
 	if(curhook = (HookDesc *)BT_find(hook_tree, (void *)hookkey))
 	{
 		espbackup = *((unsigned int *)(curhook->hookmem + 64 - 4));
-		regstates = (RegisterStates *)(espbackup - sizeof(RegisterStates));
-		stacktop = (void *)(espbackup - sizeof(RegisterStates) - 4);
+		regstates = (RegisterStates *)(espbackup/* + sizeof(RegisterStates)*/);
+		stacktop = (void *)(espbackup + sizeof(RegisterStates) + 4);
 	
 		btenum = BT_newenum(curhook->funcs);
 		while(curhookfunc = (pHookFunc)BT_next(btenum))
 			retval &= curhookfunc(regstates, stacktop);
+		BT_enumdelete(btenum);
 	}
 
 	return retval;
@@ -301,7 +304,7 @@ int SetCallHook(unsigned int calladdr, pHookFunc hookfunc, unsigned int original
 				/* perform original function call */
 /* 06 bytes */	asmRestoreEsp(curstream, espbackuplocation);						//mov esp, [esp_backup]			<- ensure correct stack state
 /* 02 bytes */	asmPopAll(curstream);												//popa							<- restore cpu registers
-/* 05 bytes */	asmJmpRelative(curstream, originaltarget);						//jmp original_vtbl_entry		<- jmp to the original method
+/* 05 bytes */	asmJmpRelative(curstream, originaltarget);						    //jmp original_vtbl_entry		<- jmp to the original method
 				
 /* 35 bytes -- skipcall label */
 
@@ -341,9 +344,139 @@ int SetCallHook(unsigned int calladdr, pHookFunc hookfunc, unsigned int original
 
 /* SetRandomHook - hooks up a specific code location in the assembly, typically the start of a function
 				 - used mostly when there are too many different call locations to a function we want to hook
-				 - this function moves a sufficient amount of instruction till after the hook code and replaces the moved instructions with a call to the hook
+				 - this function moves a sufficient amount of instructions till after the hook code and replaces the moved instructions with a call to the hook
 */
-int SetRandomHook(unsigned int address, pHookFunc hookfunc)
+int SetRandomHook(unsigned int address, unsigned int stacksize, pHookFunc hookfunc)
 {
-	return 0;
+	unsigned int hookmem;
+	Process * curps;
+	ProcessStream * pstream;
+	Stream ** curstream;
+	HookDesc * curdesc;
+
+	BufferedStream * bsstream;
+	asm_function * chunk;
+	unsigned int totalcount = 0;
+	x86_insn_t * curinsn;
+
+	int toreturn = 0;
+
+	char buff[10];
+
+	unsigned int espbackuplocation, returnimmediate, copylocation;
+
+	if( (hook_tree == NULL)
+		&& ((hook_tree = BT_create((BTCompare)def_compare)) == NULL) )
+		return 0;
+
+	/*
+		a. double check if we already have this vtbl entry, if so just insert the hookfunc if not already present
+	*/
+	if(curdesc = (HookDesc *)BT_find(hook_tree, (void *)address))
+	{
+		if(!BT_find(curdesc->funcs, (void *)hookfunc))
+			BT_insert(curdesc->funcs, (void *)hookfunc, (void *)hookfunc);
+
+		return 1;
+	}
+
+	/* 
+		b. new hook 
+			- determine how many instructions to copy
+			- copy instructions
+			- write hook code
+			- overwrite copied instructions with jmp to hook code
+	*/
+
+	if( curps = GetProcess(GetCurrentProcessId(), TYPICAL_PROCESS_PERMISSIONS) )
+	{
+		if(pstream = CreateProcessStream(curps))
+		{
+			/* count instruction bytes to copy (at least 5 bytes needed to write a jmp) */
+			totalcount = 0;
+			if(bsstream = CreateBufferedStream((Stream **)pstream, 4096))
+			{
+				asm_init((Stream **)bsstream);
+
+				if(chunk = disasm_chunk(address))
+				{
+					while( (totalcount < 5 )
+						&& (curinsn = asm_next(chunk))
+						)
+						totalcount+=curinsn->size;
+					delete_asm_function(chunk);
+				}
+
+				asm_cleanup();
+			}
+
+			/* must have at least 5 bytes to copy and maximally 10, must be able to allocate memory for hook code and copied instructions */
+			if( (totalcount >= 5) && (totalcount <=10 ) && (hookmem = (unsigned int)AllocateHookBlock(1)) && (copylocation = (unsigned int)AllocateHookBlock(0)) )
+			{
+				curstream = (Stream **)pstream;
+
+				espbackuplocation = hookmem + 64 - 4; /* put espbackup at the end of this 64 byte block */
+				returnimmediate = hookmem + 35; 
+
+				/* copy instructions */
+				SSetPos(curstream, address);
+				SRead(curstream, buff, totalcount);
+				SSetPos(curstream, copylocation);
+				SWriteBytes(curstream, buff, totalcount);
+
+				/* write jmp back at the end of the copied instructions */
+				asmJmpRelative(curstream, address + totalcount);
+
+				/* start writing hook code */
+				SSetPos(curstream, hookmem);
+
+				/* backup cpu registers and stack pointer */
+/* 02 bytes */	asmPushAll(curstream);												//pusha							<- backup cpu registers
+/* 06 bytes */	asmBackupEsp(curstream, espbackuplocation);							//mov [esp_backup], esp			<- store stack pointer at fixed address so we can safely restore the stack pointer and build a 'stack-stream'
+				
+				/* perform early hook call */
+/* 05 bytes */	asmPushImmediate(curstream, (unsigned int)address);				    //push vtblentry				<- vtblentry is used to find the hook descriptor and all callbacks
+/* 05 bytes */	asmCallRelative(curstream, (unsigned int)internal_hook);			//call internal_vtbl_hook		<- handler that looks up the hookmem_address and performs the hook call
+/* 02 bytes */	asmTestEaxEax(curstream);											//test eax, eax					<- if hook returned 0, skip the actual call
+/* 02 bytes */	asmJzRelativeShort(curstream, returnimmediate);						//jz skipcalllabel:				<- go to the skip location
+
+				/* back to original code -> jump to copied instructions which subsequently will jump back to after the overwritten part */
+/* 06 bytes */	asmRestoreEsp(curstream, espbackuplocation);						//mov esp, [esp_backup]			<- ensure correct stack state
+/* 02 bytes */	asmPopAll(curstream);												//popa							<- restore cpu registers
+/* 05 bytes */	asmJmpRelative(curstream, copylocation);						    //jmp original_vtbl_entry		<- jmp to the original method
+				
+/* 35 bytes -- skipcall label */
+
+				/* return stacksize, this assumes a random hook is set at the start of a function... other random hooks should never return 0 from the hookfunc */
+/* 06 bytes */	asmRestoreEsp(curstream, espbackuplocation);						//mov esp, [esp_backup]			<- ensure correct stack state
+/* 02 bytes */	asmPopAll(curstream);												//popa							<- restore cpu registers
+				if(stacksize == 0)
+/* 01 bytes */		asmRtn(curstream);												//rtn
+				else
+/* 03 bytes */		asmRtnStackSize(curstream, stacksize);							//rtn stacksize
+				
+/* max 50 bytes */
+
+				/* overwrite copied instructions with a jump to the hook */
+				SSetPos(curstream, (unsigned int)address);
+				asmJmpRelative(curstream, hookmem);
+
+				/* insert hook into hook table */
+				curdesc = create(HookDesc);
+				curdesc->hookmem = hookmem;
+				curdesc->funcs = BT_create((BTCompare)def_compare);
+				BT_insert(curdesc->funcs, (void *)hookfunc, (void *)hookfunc);
+				BT_insert(hook_tree, (void *)address, (void *)curdesc);
+
+				/* done */
+				toreturn = 1;
+			}
+
+			DeleteProcessStream(pstream);
+		}
+
+		clean(curps);
+	}
+
+	return toreturn;
 }

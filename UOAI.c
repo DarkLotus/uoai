@@ -117,12 +117,18 @@ void UOAI_constructor(UOAI * pThis)
 	}
 	strcpy(configs.client_window_classname, "Ultima Online");
 	
+	printf("here!\n");
+
 	hr=CoCreateInstance(&CLSID_ClientList, 0, CLSCTX_LOCAL_SERVER, &IID_IClientList, (void **)&(pThis->clientlist));
 	req_admin=(IsUserAdmin()==TRUE)?1:0;
+
+	printf("%x\n", hr);
 
 	hr=CoCreateInstanceAsAdmin(&CLSID_COMInjector, &IID_ICOMInjector, (void **)&(pThis->injector));
 	if(hr==S_OK)
 		(*(pThis->injector))->Initialize((COMObject *)pThis->injector, char2bstr(configs.client_window_classname), req_admin);
+
+	printf("%x\n", hr);
 
 	return;
 }

@@ -55,11 +55,45 @@ int __stdcall connect_hook(SOCKET s, const struct sockaddr *name, int namelen)
 		return connect(s, name, namelen);
 }
 
+int SendPacketHook(RegisterStates * regs, void * stacktop)
+{
+	char * pPacket = *((char **)stacktop);
+
+	//printf("in packet hook!\n");
+	//callibrations->ShowMessage(3, 0, "in packethook!\n");
+
+	/* debug -- check if hook is set correctly on some well-known packets */
+	if(pPacket!=NULL)
+	{
+		if(pPacket[0] == 0xAD)
+		{
+			callibrations->ShowMessage(3, 0, "unicode speech request");
+			return 0; /* disallow speech */
+		}
+		if(pPacket[0] == 0x03)
+		{
+			callibrations->ShowMessage(3, 0, "speech request");
+			return 0; /* disallow speech */
+		}
+		if(pPacket[0] == 0x02)
+			callibrations->ShowMessage(3, 0, "walk request");
+	}
+
+	return 1;
+}
+
 void Client_constructor(Client * pThis)
 {
 	DWORD oldprotect;
 
 	_original_connect = (pConnect)SetImportHook("WSOCK32.dll", "connect", (void *)connect_hook);
+
+	if(SetRandomHook((unsigned int)(callibrations->SendPacket), 4, SendPacketHook)==0)
+	{
+		printf("failed to set hook!\n");
+	}
+	else
+		printf("hook set (%x)!\n", (unsigned int)(callibrations->SendPacket));
 
 	/*
 	_original_connection_loss_handler = callibrations->NetworkObjectVtbl->onConnectionLoss;

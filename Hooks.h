@@ -41,7 +41,7 @@ int SetCallHook(unsigned int calladdr, pHookFunc hookfunc, unsigned int original
 				 - used mostly when there are too many different call locations to a function we want to hook
 				 - this function moves a sufficient amount of instruction till after the hook code and replaces the moved instructions with a call to the hook
 */
-int SetRandomHook(unsigned int address, pHookFunc hookfunc);
+int SetRandomHook(unsigned int address, unsigned int stacksize, pHookFunc hookfunc);
 
 
 #endif

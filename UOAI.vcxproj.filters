@@ -117,9 +117,6 @@
     <ClCompile Include="Streams.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StructDispatch.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sync.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -278,6 +275,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Hooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -30,6 +30,7 @@ int main()
 {
 	HMODULE hmod;
 	pDllRegisterServer regsvr;
+	pDllRegisterServer unregsvr;
 	void (*testfunc)();
 
 	if(hmod=LoadLibrary("UOAI.dll"))
