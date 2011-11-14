@@ -139,13 +139,18 @@ COMCALL Initialize(COMObject * pThis, BSTR bstr_window_class_name, int parameter
 	//initialize if required
 	if(InterlockedCompareExchange(&injector_initialized, 1, 0)==0)
 	{
-		printf("initialized!\n");
-		printf("%s\n%u\n", window_class_name, parameter);
+		//printf("initialized!\n");
+		//printf("%s\n%u\n", window_class_name, parameter);
 
 		//inits: 
 		//	- setup tree of injected clients by pid
 		//	- start injection timer : actively look for new clients every 0.5 seconds
 		bInjected=BT_create((BTCompare)_pid_compare);
+		
+		// run once before setting timer
+		ClientList_Timer(0, 0, NULL, 0);
+		
+		// set timer
 		timerid=SetTimer(0, 0, 500, (TIMERPROC)ClientList_Timer);
 	}
 

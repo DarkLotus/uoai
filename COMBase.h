@@ -278,4 +278,6 @@ int doAdvise(IUnknown * onobject, GUID * callbackiid, IUnknown * callbackinterfa
 void InternalLock();
 void InternalUnlock();
 
+void ForceUnload();
+
 #endif

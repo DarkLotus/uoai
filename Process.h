@@ -69,6 +69,7 @@ int GetModuleNameFromAddress(unsigned int targetaddress, char * modulename, unsi
 
 //typical permissions used when accessing another process
 //	note that this requires admin rights on vista and windows 7
+#define MINIMAL_PROCESS_PERMISSIONS PROCESS_QUERY_INFORMATION
 #define TYPICAL_PROCESS_PERMISSIONS PROCESS_CREATE_THREAD|PROCESS_VM_READ|PROCESS_VM_WRITE|PROCESS_VM_OPERATION|PROCESS_QUERY_INFORMATION
 #define TYPICAL_THREAD_PERMISSIONS THREAD_GET_CONTEXT|THREAD_SET_CONTEXT|THREAD_SUSPEND_RESUME|THREAD_QUERY_INFORMATION
 
