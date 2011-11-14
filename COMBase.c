@@ -545,8 +545,9 @@ HRESULT PASCAL DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **fa
 	//first time this library is used? if so..; try to initialize
 	if(InterlockedCompareExchange(&Initialized, 1, 0)==0)
 	{
-		/*
+		
 		//debug
+		/*
 		if(AllocConsole())
 		{
 			freopen("CONIN$","rb",stdin);
@@ -554,7 +555,9 @@ HRESULT PASCAL DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **fa
 			freopen("CONOUT$","wb",stderr);
 		}
 		*/
+		
 
+		/*
 		CoInitializeSecurity(   NULL,
                                        -1,
                                        NULL,
@@ -564,10 +567,12 @@ HRESULT PASCAL DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **fa
                                        NULL,
                                        0,
                                        NULL );
+									   */
 
 		//inits
 		if(!COMBaseInits(0, 0))
 		{
+			//printf("failed to init com!\n");
 			return E_UNEXPECTED;
 		}
 	}
@@ -575,18 +580,22 @@ HRESULT PASCAL DllGetClassObject(REFCLSID objGuid, REFIID factoryGuid, void **fa
 	/*if((base_classfactory==0)||(known_classes==0))//should never happen
 		return E_UNEXPECTED;*/
 	if(known_classes==0)
+	{
+		//printf(" no known classes\n");
 		return E_UNEXPECTED;
-
+	}
 	//check if a correct CLSID was passed in
 	if(requestedclass=(COMClass *)BT_find(known_classes, (void *)objGuid))
 	{
 		if(requestedclass->factory==0)
 			requestedclass->factory=CreateFactory(requestedclass);
 		factory=requestedclass->factory;
+		//printf("creating instance\n");
 		return DefaultQueryInterface(factory, factoryGuid, (COMObject **)factoryHandle);
 	}
 	else
 	{
+		//printf("don't know class\n");
 		return CLASS_E_CLASSNOTAVAILABLE;
 	}
 }

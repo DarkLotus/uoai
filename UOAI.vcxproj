@@ -167,7 +167,6 @@
     <ClCompile Include="PE.c" />
     <ClCompile Include="Process.c" />
     <ClCompile Include="Streams.c" />
-    <ClCompile Include="StructDispatch.c" />
     <ClCompile Include="Sync.c" />
     <ClCompile Include="Tools.c" />
     <ClCompile Include="Trie.c" />
@@ -222,7 +221,9 @@
     <ClInclude Include="OnInjection.h" />
     <ClInclude Include="PE.h" />
     <ClInclude Include="Process.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Streams.h" />
+    <ClInclude Include="Sync.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="Trie.h" />
     <ClInclude Include="UAC.h" />
