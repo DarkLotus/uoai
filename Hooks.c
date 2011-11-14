@@ -480,3 +480,83 @@ int SetRandomHook(unsigned int address, unsigned int stacksize, pHookFunc hookfu
 
 	return toreturn;
 }
+
+unsigned int create_thiscall_wrapper(unsigned int towrap)
+{
+	unsigned int wrapper_address = 0;
+	ProcessStream * pstream;
+	Process * curps;
+	Stream ** cstr;
+	int ok = 0;
+
+	if(wrapper_address=(unsigned int)AllocateHookBlock(0))
+	{
+		if( curps = GetProcess(GetCurrentProcessId(), TYPICAL_PROCESS_PERMISSIONS) )
+		{
+			if(pstream = CreateProcessStream(curps))
+			{
+				cstr = (Stream **)pstream;
+				
+				/*
+					wrapper code must:
+					- backup returnaddress (pop eax)
+					- thispointer -> ecx (pop ecx)
+					- push returnaddress (push eax)
+					- jmp towrap
+				*/
+				SSetPos(cstr, wrapper_address);
+				asmPopEax(cstr);
+				asmPopEcx(cstr);
+				asmPushEax(cstr);
+				asmJmpRelative(cstr, towrap);
+				
+				DeleteProcessStream(pstream);
+
+				ok = 1;
+			}
+			clean(curps);
+		}
+	}
+
+	return (ok==0)?0:wrapper_address;
+}
+
+unsigned int create_thiscall_callback(unsigned int towrap)
+{
+	unsigned int wrapper_address = 0;
+	ProcessStream * pstream;
+	Process * curps;
+	Stream ** cstr;
+	int ok = 0;
+
+	if(wrapper_address=(unsigned int)AllocateHookBlock(0))
+	{
+		if( curps = GetProcess(GetCurrentProcessId(), TYPICAL_PROCESS_PERMISSIONS) )
+		{
+			if(pstream = CreateProcessStream(curps))
+			{
+				cstr = (Stream **)pstream;
+				
+				/*
+					wrapper code must:
+					- backup returnaddress (pop eax)
+					- thispointer -> stack (push ecx)
+					- restore returnaddress (push eax)
+					- jmp towrap
+				*/
+				SSetPos(cstr, wrapper_address);
+				asmPopEax(cstr);
+				asmPushEcx(cstr);
+				asmPushEax(cstr);
+				asmJmpRelative(cstr, towrap);
+				
+				DeleteProcessStream(pstream);
+
+				ok = 1;
+			}
+			clean(curps);
+		}
+	}
+
+	return (ok==0)?0:wrapper_address;
+}

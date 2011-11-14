@@ -129,47 +129,51 @@ HRESULT STDMETHODCALLTYPE ClientWrite(Client * pThis, unsigned int color, unsign
 	return S_OK;
 }
 
-void * curyngump = NULL;
-
-void closecurgump()
+void closegump(void * pGump)
 {
-	if(curyngump == NULL)
+	if(pGump == NULL)
 		return;
 
 	__asm
 	{
-		mov ecx, curyngump
+		mov ecx, pGump
 		mov eax, [ecx]
 		mov edx, [eax]
 		push 1
 		call edx
 	}
 
-	curyngump = NULL;
-
 	return;
 }
 
-void __stdcall onyes()
+void __stdcall onyes(void * pThis)
 {
 	callibrations->ShowMessage(5555, 0, "Yes!");
 
-	closecurgump();
+	closegump(pThis);
 
 	return;
 }
 
-void __stdcall onno()
+void __stdcall onno(void * pThis)
 {
 	callibrations->ShowMessage(5555, 0, "No!");
 
-	closecurgump();
+	closegump(pThis);
 
 	return;
 }
 
+typedef void (__stdcall * pYesNoGumpConstructor_wrapper)(void * pThis, char * text, pYesNoGumpCallback onYes, pYesNoGumpCallback onNo, unsigned int unknown); 
+typedef void (__stdcall * pShowGump_wrapper)(void * pThis, void * parent, int bUnknown);//thiscall gump->Show(parent_gump)
+
 HRESULT STDMETHODCALLTYPE ShowYesNoGump(Client * pThis, BSTR question)
 {
+	static pYesNoGumpCallback _onYesCallback = 0;
+	static pYesNoGumpCallback _onNoCallback = 0;
+	static pYesNoGumpConstructor_wrapper YNGump_constructor = NULL;
+	static pShowGump_wrapper ShowGump = NULL;
+
 	char * cquestion;
 	void * pgump;
 
@@ -178,25 +182,34 @@ HRESULT STDMETHODCALLTYPE ShowYesNoGump(Client * pThis, BSTR question)
 	unsigned int ync;
 	unsigned int sg;
 
+	if(_onYesCallback == 0)
+		_onYesCallback = (pYesNoGumpCallback)create_thiscall_callback((unsigned int)onyes);
+	if(_onNoCallback == 0)
+		_onNoCallback = (pYesNoGumpCallback)create_thiscall_callback((unsigned int)onno);
+	if(YNGump_constructor == NULL)
+		YNGump_constructor = (pYesNoGumpConstructor_wrapper)create_thiscall_wrapper((unsigned int)callibrations->YesNoGumpConstructor);
+	if(ShowGump == NULL)
+		ShowGump = (pShowGump_wrapper)create_thiscall_wrapper((unsigned int)callibrations->ShowGump);
+
+	/*
 	ync = (unsigned int)callibrations->YesNoGumpConstructor;
 	sg = (unsigned int)callibrations->ShowGump;
+	*/
 	
 	if(cquestion = ole2char(question))
 	{
-		printf("allocating...\n");
+		//printf("allocating...\n");
 		pgump = callibrations->Allocator(callibrations->YesNoGumpSize);
 
 		if(pgump!=0)
 		{
-			closecurgump();
-			curyngump = pgump;
-
-			printf("constructing...\n");
+			//printf("constructing...\n");
+			/*
 			_asm
 			{
 				push 0
-				push onno
-				push onyes
+				push onNoCallback
+				push onYesCallback
 				push cquestion
 				mov ecx, pgump
 				call ync
@@ -210,9 +223,15 @@ HRESULT STDMETHODCALLTYPE ShowYesNoGump(Client * pThis, BSTR question)
 				mov ecx, pgump
 				call sg
 			}
+			*/
+
+			YNGump_constructor(pgump, cquestion, _onYesCallback, _onNoCallback, 0);
+			ShowGump(pgump, NULL, 0);
 		}
+		/*
 		else
 			printf("gump allocation failed!\n");
+			*/
 
 		clean(cquestion);
 	}

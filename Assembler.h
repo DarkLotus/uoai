@@ -41,5 +41,8 @@ unsigned int asmRtnStackSize(Stream ** pstream, unsigned short stacksize);//Rtn 
 unsigned int asmAddEdxImmediate(Stream ** pstream, unsigned char toadd);//Add edx, toadd
 unsigned int asmDecEcx(Stream ** pstream);//dec ecx;
 unsigned int asmJnzRelativeShort(Stream ** pstream, unsigned int absolute_address);//jnz relative short (only 1 byte for jump-distance!)
+unsigned int asmPopEcx(Stream ** pstream);//pop ecx
+unsigned int asmPopEax(Stream ** pstream);//pop eax
+unsigned int asmPushEcx(Stream ** pstream);//push ecx
 
 #endif

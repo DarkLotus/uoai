@@ -225,3 +225,24 @@ unsigned int asmJnzRelativeShort(Stream ** pstream, unsigned int absolute_addres
 
 	return 2;
 }
+
+unsigned int asmPopEcx(Stream ** pstream)//pop ecx
+{
+	SWriteByte(pstream, 0x59);
+
+	return 1;
+}
+
+unsigned int asmPopEax(Stream ** pstream)//pop eax
+{
+	SWriteByte(pstream, 0x58);
+
+	return 1;
+}
+
+unsigned int asmPushEcx(Stream ** pstream)//push ecx
+{
+	SWriteByte(pstream, 0x51);
+
+	return 1;
+}
