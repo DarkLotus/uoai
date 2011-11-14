@@ -11,10 +11,7 @@ void strupper(char * str)
 	for(i=0; i<len; i++)
 	{
 		if( (str[i]>='a') && (str[i] <= 'z') )
-		{
-			str[i]-='a';
-			str[i]+='A';
-		}
+			str[i]+=('A'-'a');
 	}
 }
 

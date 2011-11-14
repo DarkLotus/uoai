@@ -58,24 +58,18 @@ int __stdcall connect_hook(SOCKET s, const struct sockaddr *name, int namelen)
 int SendPacketHook(RegisterStates * regs, void * stacktop)
 {
 	char * pPacket = *((char **)stacktop);
-
+	unsigned int cmd;
 	//printf("in packet hook!\n");
 	//callibrations->ShowMessage(3, 0, "in packethook!\n");
 
 	/* debug -- check if hook is set correctly on some well-known packets */
 	if(pPacket!=NULL)
 	{
-		if(pPacket[0] == 0xAD)
-		{
-			callibrations->ShowMessage(3, 0, "unicode speech request");
-			return 0; /* disallow speech */
-		}
-		if(pPacket[0] == 0x03)
-		{
-			callibrations->ShowMessage(3, 0, "speech request");
-			return 0; /* disallow speech */
-		}
-		if(pPacket[0] == 0x02)
+		cmd = (unsigned int)(pPacket[0])&0xFF;
+		printf("pPacket[0] == %x\n", cmd);
+		if(cmd == 0xAD)
+			return 0;
+		if(cmd == 0x02)
 			callibrations->ShowMessage(3, 0, "walk request");
 	}
 

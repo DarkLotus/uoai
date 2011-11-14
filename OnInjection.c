@@ -28,6 +28,11 @@ LRESULT CALLBACK MsgHook(int code, WPARAM wParam, LPARAM lParam)
 	case WM_QUIT:
 		if((clientclass=FindClass((GUID *)&CLSID_Client))&&(clientclass->activeobject!=0))
 		{
+			//invoke onClose event
+			pars=DispStack(1);
+			DispPush(pars, VObject(clientclass->activeobject));
+			InvokeEvent((COMObject *)(clientclass->activeobject), 1, pars, 0);
+
 			//get client list, unregister self
 			if(clientlist_object)
 			{
@@ -40,11 +45,6 @@ LRESULT CALLBACK MsgHook(int code, WPARAM wParam, LPARAM lParam)
 				clientlist_object->lpVtbl->Release(clientlist_object);
 				clientlist_object=0;
 			}
-
-			//invoke onClose event
-			pars=DispStack(1);
-			DispPush(pars, VObject(clientclass->activeobject));
-			InvokeEvent((COMObject *)(clientclass->activeobject), 1, pars, 0);
 		}
 		break;
 	default:

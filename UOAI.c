@@ -102,12 +102,12 @@ void UOAI_constructor(UOAI * pThis)
 	HRESULT hr;
 
 	//Debug Code <to be removed>
-	if(AllocConsole())
+	/*if(AllocConsole())
 		{
 			freopen("CONIN$","rb",stdin);
 			freopen("CONOUT$","wb",stdout);
 			freopen("CONOUT$","wb",stderr);
-		}
+		}*/
 
 	//default configurations
 	strcpy(configs.client_exe, "client.exe");
@@ -117,18 +117,18 @@ void UOAI_constructor(UOAI * pThis)
 	}
 	strcpy(configs.client_window_classname, "Ultima Online");
 	
-	printf("here!\n");
+	//printf("here!\n");
 
 	hr=CoCreateInstance(&CLSID_ClientList, 0, CLSCTX_LOCAL_SERVER, &IID_IClientList, (void **)&(pThis->clientlist));
 	req_admin=(IsUserAdmin()==TRUE)?1:0;
 
-	printf("%x\n", hr);
+	//printf("%x\n", hr);
 
 	hr=CoCreateInstanceAsAdmin(&CLSID_COMInjector, &IID_ICOMInjector, (void **)&(pThis->injector));
 	if(hr==S_OK)
 		(*(pThis->injector))->Initialize((COMObject *)pThis->injector, char2bstr(configs.client_window_classname), req_admin);
 
-	printf("%x\n", hr);
+	//printf("%x\n", hr);
 
 	return;
 }
@@ -137,10 +137,9 @@ void UOAI_constructor(UOAI * pThis)
 void UOAI_destructor(UOAI * pThis)
 {
 	if(pThis->injector)
-		((IUnknown *)(pThis->injector))->lpVtbl->Release((IUnknown *)pThis->injector);
+		((IUnknown *)(pThis->injector))->lpVtbl->Release((IUnknown *)pThis->injector);	
 	if(pThis->clientlist)
 		((IUnknown *)(pThis->clientlist))->lpVtbl->Release((IUnknown *)pThis->clientlist);
-
 	return;
 }
 

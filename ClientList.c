@@ -10,6 +10,8 @@
 
 #include "UAC.h"
 
+void validate_clientlist();
+
 BinaryTree * client_by_pid=0;
 unsigned int refcount=0;
 
@@ -32,14 +34,14 @@ void ClientList_constructor(ClientList * pThis)
 	{
 		//open console for debugging purposes <to be removed>
 
-#if 0
 		if(AllocConsole())
 		{
 			freopen("CONIN$","rb",stdin);
 			freopen("CONOUT$","wb",stdout);
 			freopen("CONOUT$","wb",stderr);
 		}
-#endif
+
+		printf("clientlist\n");
 
 		//client list is maintained as a binary tree, with the client's PID as key
 		client_by_pid=BT_create((BTCompare)pid_compare);				
@@ -68,6 +70,9 @@ void ClientList_destructor(ClientList * pThis)
 			clean(curclient);
 		}
 		BT_delete(client_by_pid);
+
+		// make sure dll host terminates
+		ForceUnload();
 	}
 
 	return;
@@ -75,11 +80,42 @@ void ClientList_destructor(ClientList * pThis)
 
 COMCALL GetCount(ClientList * pThis, unsigned int * count)
 {
-	printf("requesting count!\n");
+	//printf("requesting count!\n");
+
+	validate_clientlist();
 
 	(*count)=client_by_pid->itemcount;
 
 	return S_OK;
+}
+
+void validate_clientlist()
+{
+	LinkedList * ll_clients;
+	unsigned int pid;
+	Process * ps;
+	VARIANT * curclient;
+
+	if(ll_clients = BT_keys(client_by_pid))
+	{
+		while(pid = (unsigned int)LL_pop(ll_clients))
+		{
+			if(ps=GetProcess(pid, MINIMAL_PROCESS_PERMISSIONS))
+				clean(ps);
+			else
+			{
+				/* invalid client in list */
+				curclient = (VARIANT *)BT_remove(client_by_pid, (void *)pid);
+				VariantClear((VARIANTARG *)curclient);
+				clean(curclient);
+				InternalAddRef(); /* client shut down without removing itself from the clientlist
+									 this should imply the clientlist reference was never released
+									 so we make this stale reference internal here to prevent a
+									 memory leak */
+			}
+		}
+		LL_delete(ll_clients);
+	}
 }
 
 COMCALL GetClient(ClientList * pThis, long index, IUnknown ** client)
@@ -89,27 +125,29 @@ COMCALL GetClient(ClientList * pThis, long index, IUnknown ** client)
 	VARIANT * curclient;
 	HRESULT hr;
 
-	printf("finding client?\n");
+	validate_clientlist();
+
+	//printf("finding client?\n");
 	curclient=0;
 	btenum=BT_newenum(client_by_pid);
 	i=0;
 	while((i<=index)&&(curclient=(VARIANT *)BT_next(btenum)))
 		i++;
 	BT_enumdelete(btenum);
-	printf("client list looped, index=%u, curclient=%x!, curclient->pUnkVal=%x\n", index, curclient, curclient->punkVal);
+	//printf("client list looped, index=%u, curclient=%x!, curclient->pUnkVal=%x\n", index, curclient, curclient->punkVal);
 
 	if((i>index)&&(curclient))
 	{
-		printf("querying interface\n");
+		//printf("querying interface\n");
 		hr=curclient->punkVal->lpVtbl->QueryInterface(curclient->punkVal, &IID_IClient, (void **)client);
-		printf("interface query done\n");
-		if(hr!=S_OK)
-			printf("query interface returned %x\n", hr);
+		//printf("interface query done\n");
+		/*if(hr!=S_OK)
+			printf("query interface returned %x\n", hr);*/
 		return hr;
 	}
 	else
 	{
-		printf("client not found?\n");
+		//printf("client not found?\n");
 		(*client)=0;
 		return S_FALSE;
 	}
@@ -120,6 +158,8 @@ COMCALL GetClient(ClientList * pThis, long index, IUnknown ** client)
 COMCALL ClientListNewEnum(ClientList * pThis, IUnknown ** newenum)
 {
 	LinkedList * clients;
+
+	validate_clientlist();
 
 	clients=BT_values(client_by_pid);
 
@@ -145,7 +185,7 @@ COMCALL RegisterClient(ClientList * pThis, IUnknown * pClientDisp)
 
 	curstack=DispStack(0);
 	
-	printf("registering client\n");
+	//printf("registering client\n");
 
 	pClientDisp->lpVtbl->AddRef(pClientDisp);
 	if(DoPropGet(pClientDisp, 1, curstack, &vpid)==S_OK)
@@ -234,6 +274,8 @@ COMCALL UnregisterClient(ClientList * pThis, IUnknown * pClientDisp)
 COMCALL FindClient(ClientList * pThis, unsigned int pid, IUnknown ** client, VARIANT_BOOL * bSuccess)
 {
 	VARIANT * prevclient;
+
+	validate_clientlist();
 
 	(*bSuccess)=VARIANT_FALSE;
 

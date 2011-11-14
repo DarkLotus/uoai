@@ -14,6 +14,8 @@ unsigned int TotalRefCount=0;
 unsigned int InternalRefCount=0;
 unsigned int LockCount=0;
 
+/* following variables allow reference count corrections when we know something has not correctly been released */
+unsigned int forcebly_unload = 0; /* forced unloads should not be used */
 
 //default IClassFactory Implementation
 
@@ -512,6 +514,9 @@ HRESULT STDMETHODCALLTYPE DefaultInvoke(COMObject * pThis, DISPID dispid, REFIID
 
 HRESULT PASCAL DllCanUnloadNow(void)
 {
+	if(forcebly_unload!=0)
+		return S_OK;
+
 	if((LockCount>0)||(TotalRefCount>InternalRefCount))
 		return S_FALSE;
 	else
@@ -1386,6 +1391,8 @@ HRESULT STDMETHODCALLTYPE Advise(ConnectionPoint * pThis,IUnknown * pUnk,DWORD *
 		{
 			if(curdisp->lpVtbl->GetIDsOfNames(curdisp, &IID_NULL, &(curpair->name), 1, 0, &curid)==S_OK)
 				BT_insert(newconn->dispids, (void *)curpair->id, (void *)curid);
+			else//if names are incorrect assume the correct DISPID is used
+				BT_insert(newconn->dispids, (void *)curpair->id, (void *)curpair->id);
 
 			clean(curpair);
 		}
@@ -1789,3 +1796,7 @@ void InternalUnlock()
 	return;
 }
 
+void ForceUnload()
+{
+	forcebly_unload = 1;
+}
