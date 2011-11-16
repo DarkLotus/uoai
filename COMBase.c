@@ -649,17 +649,17 @@ ITypeLib * OpenTypeLib(int regtypelib, int unregtypelib)
 			clean(olepath);
 			return 0;
 		}
+	}
 
-		//register or unregister if requested
-		if(regtypelib)
-			RegisterTypeLib(_tlb, olepath, 0);
-		else if(unregtypelib)
+	//register or unregister if requested
+	if(regtypelib)
+		RegisterTypeLib(_tlb, olepath, 0);
+	else if(unregtypelib)
+	{
+		if(_tlb->lpVtbl->GetLibAttr(_tlb, &attr)==S_OK)
 		{
-			if(_tlb->lpVtbl->GetLibAttr(_tlb, &attr)==S_OK)
-			{
-				UnRegisterTypeLib(&attr->guid, attr->wMajorVerNum, attr->wMinorVerNum, attr->lcid, attr->syskind);
-				_tlb->lpVtbl->ReleaseTLibAttr(_tlb, attr);
-			}
+			UnRegisterTypeLib(&attr->guid, attr->wMajorVerNum, attr->wMinorVerNum, attr->lcid, attr->syskind);
+			_tlb->lpVtbl->ReleaseTLibAttr(_tlb, attr);
 		}
 	}
 

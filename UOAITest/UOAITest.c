@@ -39,6 +39,12 @@ int main()
 		{
 			testfunc();
 		}
+
+		if(unregsvr=(pDllRegisterServer)GetProcAddress(hmod, "DllUnregisterServer"))
+		{
+			unregsvr();
+		}
+
 		if(regsvr=(pDllRegisterServer)GetProcAddress(hmod, "DllRegisterServer"))
 		{
 			regsvr();

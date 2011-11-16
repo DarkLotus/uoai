@@ -40,6 +40,12 @@ typedef struct PathNodeStruct
 	struct PathNodeStruct * next;
 } PathNode;
 
+typedef struct AOSStringStruct
+{
+	unsigned short * pString;
+	unsigned int unknowns[4];
+} AOSString;
+
 typedef int (WINAPI * pWinMain)(HINSTANCE, HINSTANCE, LPSTR pCmdLine, int nCmdShow);
 typedef void (* pGeneralPurposeFunction)(int bool_argument);
 typedef Item * (* pFindItemByID)(unsigned int ID);
@@ -61,8 +67,8 @@ typedef PathNode * (* pCalculatePath)(unsigned int startx, unsigned int starty, 
 typedef PathNode * (* pInvertPath)();//invert path pointed to by CurrentPathNode
 typedef void (* pShowMessage)(unsigned int color, unsigned int font, char * text);
 typedef void (__stdcall * pInitString)(unsigned short * ustring);//ecx = 20byte=5 dword's struct, initialized to 0, -> struct[0]=short * pointer
-typedef void (* pGetName)(unsigned int id, void * stringobject, int bUnknown, int bUnknown2);
-typedef void (* pGetProperties)(unsigned int id, void * stringobject, int bUnknown, int bUnknown2);
+typedef void (* pGetName)(unsigned int id, AOSString * stringobject, int bUnknown, int bUnknown2);
+typedef void (* pGetProperties)(unsigned int id, AOSString * stringobject, int bUnknown, int bUnknown2);
 typedef void (__stdcall * pShowGump)(void * parent, int bUnknown);//thiscall gump->Show(parent_gump)
 
 //PathNode structure offsets are very unlikely to change, so it makes more sense to define a struct PathNode with fixed offsets than to callibrate the fieldoffsets.

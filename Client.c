@@ -283,3 +283,9 @@ UOCallibrations * GetCallibrations()
 {
 	return callibrations;
 }
+
+HRESULT STDMETHODCALLTYPE GetPlayer(Client * pThis, Item * pPlayer)
+{
+	pPlayer = GetItemByOffset((unsigned int)(callibrations->Player));
+	return S_OK;
+}

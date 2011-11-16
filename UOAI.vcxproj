@@ -173,6 +173,7 @@
     <ClCompile Include="UAC.c" />
     <ClCompile Include="UOAI.c" />
     <ClCompile Include="UOCallibrations.c" />
+    <ClCompile Include="UOItem.c" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="UOAI.idl">
