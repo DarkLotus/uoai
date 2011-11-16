@@ -12,6 +12,7 @@
 #include "Features.h"
 #include "COMBase.h"
 #include "UOCallibrations.h"
+#include "UOItem.h"
 
 // {BFC0EE0A-2B29-41d9-83DA-4B6B61EF54F9}
 DEFINE_GUID(CLSID_Client, 
@@ -37,6 +38,7 @@ typedef struct ClientVtblStruct
 	HRESULT (STDMETHODCALLTYPE * Write)(Client * pThis, unsigned int color, unsigned int font, BSTR message);
 	HRESULT (STDMETHODCALLTYPE * Bark)(Client * pThis, BSTR speech);
 	HRESULT (STDMETHODCALLTYPE * ShowYesNoGump)(Client * pThis, BSTR question);
+	HRESULT (STDMETHODCALLTYPE * GetPlayer)(Client * pThis, Item * pPlayer);
 } ClientVtbl;
 
 void Client_constructor(Client * pThis);
@@ -46,6 +48,7 @@ HRESULT STDMETHODCALLTYPE GetPID(Client * pThis, unsigned int * pPID);
 HRESULT STDMETHODCALLTYPE ClientWrite(Client * pThis, unsigned int color, unsigned int font, BSTR message);
 HRESULT STDMETHODCALLTYPE Bark(Client * pThis, BSTR speech);
 HRESULT STDMETHODCALLTYPE ShowYesNoGump(Client * pThis, BSTR question);
+HRESULT STDMETHODCALLTYPE GetPlayer(Client * pThis, Item * pPlayer);
 
 void SetCallibrations(UOCallibrations * callibs);
 UOCallibrations * GetCallibrations();

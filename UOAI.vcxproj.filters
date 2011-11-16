@@ -138,6 +138,9 @@
     <ClCompile Include="Hooks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UOItem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="UOAI.idl">

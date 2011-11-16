@@ -104,7 +104,8 @@ ClientVtbl _ClientVtbl = {
 	GetPID,
 	ClientWrite,
 	Bark,
-	ShowYesNoGump
+	ShowYesNoGump,
+	GetPlayer
 };
 
 GUID * ClientGuids[3] = { (GUID *)&IID_IUnknown, (GUID *)&IID_IDispatch, (GUID *)&IID_IClient};
@@ -127,6 +128,8 @@ COMClass ClientClass = {
 	0									//instances (init to 0)
 };
 
+extern COMClass ItemClass;
+
 int COMInits()
 {
 	COMConfig * configs;
@@ -142,6 +145,7 @@ int COMInits()
 	AddCOMClass(&ClientListClass);
 	AddCOMClass(&ClientClass);
 	AddCOMClass(&COMInjectorClass);
+	AddCOMClass(&ItemClass);
 
 	return 1;
 }
