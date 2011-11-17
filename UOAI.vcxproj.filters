@@ -141,6 +141,9 @@
     <ClCompile Include="UOItem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UOItemList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="UOAI.idl">
@@ -286,6 +289,9 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UOItemList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UOAIResources.rc">
@@ -296,6 +302,5 @@
     <CustomBuild Include="UOAI.def">
       <Filter>Source Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="Debug\UOAI.tlb" />
   </ItemGroup>
 </Project>

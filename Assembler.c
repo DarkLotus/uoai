@@ -121,6 +121,15 @@ unsigned int asmJmpRelative(Stream ** pstream, unsigned int absolute_address)
 	return 5;
 }
 
+unsigned int asmJmpImmediate(Stream ** pstream, unsigned int absolute_address)
+{
+	printf("aa: %x\n", absolute_address);
+	SWriteByte(pstream, 0xEA);
+	SWriteUInt(pstream, absolute_address);
+
+	return 5;
+}
+
 unsigned int asmPushAll(Stream ** pstream)//pusha (used for context switching purposes)
 {
 	SWriteByte(pstream, 0x60);

@@ -398,6 +398,10 @@ HRESULT STDMETHODCALLTYPE DefaultQueryInterface(COMObject * pThis, REFIID riid, 
 		return S_OK;
 	}
 
+	printf("queryinterface on unsupported IID: ");
+	PrintGUID((GUID *)&riid);
+	printf("\n");
+
 	return E_NOINTERFACE;	
 }
 
@@ -1180,14 +1184,16 @@ HRESULT STDMETHODCALLTYPE LLQueryInterface(COMObject * pThis,REFIID riid, COMObj
 
 	lle_this=(LinkedListEnumerator *)pThis;
 
-	if(IsEqualIID(lle_this->_iid, riid)||IsEqualIID(lle_this->_iid, &IID_IUnknown))
+	if(IsEqualIID(lle_this->_iid, riid)||IsEqualIID(riid, &IID_IUnknown))
 	{
 		(*ppv)=pThis;
 		(*ppv)->refcount++;	
 		TotalRefCount++;
+		printf("got iid\n");
 		return S_OK;
 	}
 
+	printf("E_NOINTERFACE\n");
 	return E_NOINTERFACE;
 }
 
@@ -1196,6 +1202,8 @@ HRESULT STDMETHODCALLTYPE LLNext(COMObject * pThis, ULONG count, void ** arr_out
 	LinkedListEnumerator * lle_this;
 	unsigned int i;
 	void * cur;
+
+	printf("LL_next\n");
 
 	lle_this=(LinkedListEnumerator *)pThis;
 
@@ -1236,6 +1244,8 @@ HRESULT STDMETHODCALLTYPE LLSkip(COMObject * pThis, ULONG count)
 	LinkedListEnumerator * lle_this;
 	unsigned int i;
 
+	printf("LL_skip\n");
+
 	lle_this=(LinkedListEnumerator *)pThis;
 
 	i=0;
@@ -1252,6 +1262,8 @@ HRESULT STDMETHODCALLTYPE LLReset(COMObject * pThis)
 {
 	LinkedListEnumerator * lle_this;
 
+	printf("LL_reset\n");
+
 	lle_this=(LinkedListEnumerator *)pThis;
 
 	LL_reset(lle_this->_llenum);
@@ -1263,6 +1275,8 @@ HRESULT STDMETHODCALLTYPE LLClone(COMObject * pThis, void ** ppenum)
 {
 	LinkedListEnumerator * lle_this;
 	LinkedListEnum * newenum;
+
+	printf("LL_clone\n");
 
 	lle_this=(LinkedListEnumerator *)pThis;
 
@@ -1561,6 +1575,17 @@ void DispPush(DISPPARAMS * dispstack, VARIANT * arg)
 	dispstack->cArgs++;
 
 	return;
+}
+
+VARIANT * VDispObject(IDispatch * pUnk)
+{
+	VARIANT * toreturn;
+
+	toreturn=create(VARIANT);
+	pUnk->lpVtbl->QueryInterface(pUnk, &IID_IDispatch, (void **)&(toreturn->pdispVal));
+	toreturn->vt=VT_DISPATCH;
+
+	return toreturn;
 }
 
 VARIANT * VObject(IUnknown * pUnk)

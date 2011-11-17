@@ -174,6 +174,7 @@
     <ClCompile Include="UOAI.c" />
     <ClCompile Include="UOCallibrations.c" />
     <ClCompile Include="UOItem.c" />
+    <ClCompile Include="UOItemList.c" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="UOAI.idl">
@@ -184,9 +185,6 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="UOAI.def" />
-    <CustomBuild Include="Debug\UOAI.tlb">
-      <FileType>Document</FileType>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Features.h" />
@@ -232,6 +230,7 @@
     <ClInclude Include="UOCallibrations.h" />
     <ClInclude Include="UOGump.h" />
     <ClInclude Include="UOItem.h" />
+    <ClInclude Include="UOItemList.h" />
     <ClInclude Include="UOJournal.h" />
     <ClInclude Include="UOMacros.h" />
     <ClInclude Include="UONetwork.h" />

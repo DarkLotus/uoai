@@ -44,5 +44,6 @@ unsigned int asmJnzRelativeShort(Stream ** pstream, unsigned int absolute_addres
 unsigned int asmPopEcx(Stream ** pstream);//pop ecx
 unsigned int asmPopEax(Stream ** pstream);//pop eax
 unsigned int asmPushEcx(Stream ** pstream);//push ecx
+unsigned int asmJmpImmediate(Stream ** pstream, unsigned int absolute_address);//jmp address - non-relative
 
 #endif

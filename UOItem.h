@@ -15,8 +15,8 @@
 
 typedef struct _ItemOffsetsStruct
 {
-	//19 first offsets are callibrated from the NewItem-packet handler (0x1A packet)
-	unsigned int unknown[4];//don't know (yet) , but these are valid offsets (should be 0x8, 0x10, 0x14 and 0x18) //0 and 0x4 are also valid, but those are the vtbl and a 0xFEEDBEEF members and are not callibrated
+	//15 first offsets are callibrated from the NewItem-packet handler (0x1A packet)
+	//unsigned int unknown[4];//don't know (yet) , but these are valid offsets (should be 0x8, 0x10, 0x14 and 0x18) //0 and 0x4 are also valid, but those are the vtbl and a 0xFEEDBEEF members and are not callibrated
 	unsigned int oX;//0x24 -> (unsigned short *)
 	unsigned int oY;//0x26 -> (unsigned short *)
 	unsigned int oZ;//0x28 -> (char *)
@@ -93,13 +93,16 @@ typedef struct
 	unsigned int * NextFollower;
 	unsigned int * Status;
 	unsigned int * Status2;
+	unsigned int self;
 } ClientItem;
 
 #pragma pack(pop)
 
+#if 0//no support for custom items at this point, so i don't see a reason to allow construction of items
 // {2104F772-4791-4d80-B277-D026BEA08363}
 DEFINE_GUID(CLSID_Item, 
 0x2104f772, 0x4791, 0x4d80, 0xb2, 0x77, 0xd0, 0x26, 0xbe, 0xa0, 0x83, 0x63);
+#endif
 
 // {FD02A988-A3E2-4ba2-A4E9-DF2CF90B2748}
 DEFINE_GUID(IID_IItem, 
@@ -113,6 +116,15 @@ DEFINE_GUID(CLSID_Mobile,
 DEFINE_GUID(IID_IMobile, 
 0x4b760f4b, 0xfa70, 0x48a9, 0xba, 0xb2, 0xbe, 0xb5, 0xe0, 0x2, 0x26, 0xe2);
 
+// {1324EE7E-40FE-4db0-87AA-042D5499657E}
+DEFINE_GUID(IID_IItemList, 
+0x1324ee7e, 0x40fe, 0x4db0, 0x87, 0xaa, 0x4, 0x2d, 0x54, 0x99, 0x65, 0x7e);
+
+// {E38878DE-8A6A-48bc-89E8-307E6980021A}
+DEFINE_GUID(IID_IContainer, 
+0xe38878de, 0x8a6a, 0x48bc, 0x89, 0xe8, 0x30, 0x7e, 0x69, 0x80, 0x2, 0x1a);
+
+
 typedef struct
 {
 	COMObject header;
@@ -122,34 +134,37 @@ typedef struct
 typedef struct
 {
 	DEFAULT_DISPATCH;
-	HRESULT (__stdcall *item_get_Id)(Item * pThis, int * pID);
-	HRESULT (__stdcall *item_put_Id)(Item * pThis, int ID);
-	HRESULT (__stdcall *item_get_Type)(Item * pThis, int * pType);
-	HRESULT (__stdcall *item_put_Type)(Item * pThis, int Type);
-	HRESULT (__stdcall *item_get_TypeIncrement)(Item * pThis, int * pTypeIncrement);
-	HRESULT (__stdcall *item_put_TypeIncrement)(Item * pThis, int TypeIncrement);
-	HRESULT (__stdcall *item_get_Position)(Item * pThis, Point2D * pPos);
-	HRESULT (__stdcall *item_put_Position)(Item * pThis, Point2D pos);
-	HRESULT (__stdcall *item_get_z)(Item * pThis, int * pPos);
-	HRESULT (__stdcall *item_put_z)(Item * pThis, int pos);
-	HRESULT (__stdcall *item_get_StackCount)(Item * pThis, int * pCount);
-	HRESULT (__stdcall *item_put_StackCount)(Item * pThis, int count);
-	HRESULT (__stdcall *item_get_Color)(Item * pThis, int * pColor);
-	HRESULT (__stdcall *item_put_Color)(Item * pThis, int color);
-	HRESULT (__stdcall *item_get_HighlightColor)(Item * pThis, int * pHighlightColor);
-	HRESULT (__stdcall *item_put_HighlightColor)(Item * pThis, int highlightcolor);
-	HRESULT (__stdcall *item_get_Direction)(Item * pThis, int * pDirection);
-	HRESULT (__stdcall *item_put_Direction)(Item * pThis, int direction);
-	HRESULT (__stdcall *item_get_Flags)(Item * pThis, int * pFlags);
-	HRESULT (__stdcall *item_put_Flags)(Item * pThis, int Flags);
-	HRESULT (__stdcall *item_get_Name)(Item * pThis, BSTR * pName);
-	HRESULT (__stdcall *item_put_Name)(Item * pThis, BSTR strName);
-	HRESULT (__stdcall *item_get_Properties)(Item * pThis, BSTR * pProperties);
-	HRESULT (__stdcall *item_put_Properties)(Item * pThis, BSTR strProperties);
-	HRESULT (__stdcall *item_Click)(Item * pThis);
-	HRESULT (__stdcall *item_DoubleClick)(Item * pThis);
-	HRESULT (__stdcall *item_Drag)(Item * pThis);
-} IItemVtbl;
+	HRESULT (__stdcall *get_Id)(Item * pThis, int * pID);
+	HRESULT (__stdcall *put_Id)(Item * pThis, int ID);
+	HRESULT (__stdcall *get_Type)(Item * pThis, int * pType);
+	HRESULT (__stdcall *put_Type)(Item * pThis, int Type);
+	HRESULT (__stdcall *get_TypeIncrement)(Item * pThis, int * pTypeIncrement);
+	HRESULT (__stdcall *put_TypeIncrement)(Item * pThis, int TypeIncrement);
+	HRESULT (__stdcall *get_Position)(Item * pThis, Point2D * pPos);
+	HRESULT (__stdcall *put_Position)(Item * pThis, Point2D pos);
+	HRESULT (__stdcall *get_z)(Item * pThis, int * pPos);
+	HRESULT (__stdcall *put_z)(Item * pThis, int pos);
+	HRESULT (__stdcall *get_StackCount)(Item * pThis, int * pCount);
+	HRESULT (__stdcall *put_StackCount)(Item * pThis, int count);
+	HRESULT (__stdcall *get_Color)(Item * pThis, int * pColor);
+	HRESULT (__stdcall *put_Color)(Item * pThis, int color);
+	HRESULT (__stdcall *get_HighlightColor)(Item * pThis, int * pHighlightColor);
+	HRESULT (__stdcall *put_HighlightColor)(Item * pThis, int highlightcolor);
+	HRESULT (__stdcall *get_Direction)(Item * pThis, int * pDirection);
+	HRESULT (__stdcall *put_Direction)(Item * pThis, int direction);
+	HRESULT (__stdcall *get_Flags)(Item * pThis, int * pFlags);
+	HRESULT (__stdcall *put_Flags)(Item * pThis, int Flags);
+	HRESULT (__stdcall *get_Name)(Item * pThis, BSTR * pName);
+	HRESULT (__stdcall *put_Name)(Item * pThis, BSTR strName);
+	HRESULT (__stdcall *get_Properties)(Item * pThis, BSTR * pProperties);
+	HRESULT (__stdcall *put_Properties)(Item * pThis, BSTR strProperties);
+	HRESULT (__stdcall *Click)(Item * pThis);
+	HRESULT (__stdcall *DoubleClick)(Item * pThis);
+	HRESULT (__stdcall *Drag)(Item * pThis);
+	HRESULT (__stdcall *IsMobile)(Item * pThis, VARIANT_BOOL * bIsMobile);
+	HRESULT (__stdcall *IsContainer)(Item * pThis, VARIANT_BOOL * bIsContainer);
+	HRESULT (__stdcall *IsMulti)(Item * pThis, VARIANT_BOOL * bIsMulti);
+} IItem;
 
 HRESULT __stdcall item_get_Id(Item * pThis, int * pID);
 HRESULT __stdcall item_put_Id(Item * pThis, int ID);
@@ -178,8 +193,25 @@ HRESULT __stdcall item_put_Properties(Item * pThis, BSTR strProperties);
 HRESULT __stdcall item_Click(Item * pThis);
 HRESULT __stdcall item_DoubleClick(Item * pThis);
 HRESULT __stdcall item_Drag(Item * pThis);
+HRESULT __stdcall item_return_false(Item * pThis, VARIANT_BOOL * bResult);
+HRESULT __stdcall item_return_true(Item * pThis, VARIANT_BOOL * bResult);
 
 Item * GetItemByID(unsigned int ID);
 Item * GetItemByOffset(unsigned int offset);
+
+ClientItem * item_get_pointers(unsigned int ID);
+
+typedef struct
+{
+	IItem itemmembers;
+	HRESULT (__stdcall * IsOpen)(Item * pThis, VARIANT_BOOL * bIsOpen);
+	HRESULT (__stdcall * Open)(Item * pThis, VARIANT_BOOL * bOpened);
+	HRESULT (__stdcall * Content)(Item * pThis, void ** pContents);
+} IContainer;
+
+HRESULT __stdcall container_IsContainer(Item * pThis, VARIANT_BOOL * bIsContainer);
+HRESULT __stdcall container_IsOpen(Item * pThis, VARIANT_BOOL * bIsOpen);
+HRESULT __stdcall container_Open(Item * pThis, VARIANT_BOOL * bOpened);
+HRESULT __stdcall container_Content(Item * pThis, void ** pContents);
 
 #endif
