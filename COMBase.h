@@ -252,6 +252,7 @@ VARIANT * VByteArray(unsigned char * array, unsigned int size);
 VARIANT * VInt(int value);
 VARIANT * VString(char * str);
 VARIANT * VObject(IUnknown * pDisp);
+VARIANT * VDispObject(IDispatch * pUnk);
 void DispPush(DISPPARAMS * dispstack, VARIANT * arg);
 DISPPARAMS * DispStack(unsigned int stacksize);
 

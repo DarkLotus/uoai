@@ -481,6 +481,16 @@ int SetRandomHook(unsigned int address, unsigned int stacksize, pHookFunc hookfu
 	return toreturn;
 }
 
+int wrapper_compare(unsigned int a, unsigned int b)
+{
+	if(a>b)
+		return +1;
+	else if(a<b)
+		return -1;
+	else
+		return 0;
+}
+
 unsigned int create_thiscall_wrapper(unsigned int towrap)
 {
 	unsigned int wrapper_address = 0;
@@ -488,6 +498,14 @@ unsigned int create_thiscall_wrapper(unsigned int towrap)
 	Process * curps;
 	Stream ** cstr;
 	int ok = 0;
+
+	static BinaryTree * btWrappers = NULL;
+
+	if(btWrappers == NULL)
+		btWrappers = BT_create((BTCompare)wrapper_compare);
+
+	if(wrapper_address = (unsigned int)BT_find(btWrappers, (void *)towrap))
+		return wrapper_address;
 
 	if(wrapper_address=(unsigned int)AllocateHookBlock(0))
 	{
@@ -511,6 +529,8 @@ unsigned int create_thiscall_wrapper(unsigned int towrap)
 				asmJmpRelative(cstr, towrap);
 				
 				DeleteProcessStream(pstream);
+
+				BT_insert(btWrappers, (void *)towrap, (void *)wrapper_address);
 
 				ok = 1;
 			}

@@ -55,20 +55,73 @@ int __stdcall connect_hook(SOCKET s, const struct sockaddr *name, int namelen)
 		return connect(s, name, namelen);
 }
 
+unsigned int sbo(unsigned int toswap)
+{
+	unsigned char * bytes = (unsigned char *)toswap;
+	unsigned char temp;
+	temp = bytes[0];
+	bytes[0] = bytes[3];
+	bytes[3] = temp;
+	temp = bytes[1];
+	bytes[1] = bytes[2];
+	bytes[2] = temp;
+
+	return *((unsigned int *)bytes);
+}
+
+int HandlePacketHook(RegisterStates * regs, void * stacktop)
+{
+	char * pPacket = *((char **)stacktop);
+	unsigned int cmd;
+
+	if(pPacket!=NULL)
+	{
+		cmd = (unsigned int)(pPacket[0])&0xFF;
+		printf("received packet %x\n", cmd);
+
+		/* test */
+		if(cmd == 0xAE)
+		{
+			unsigned int * pID;
+			unsigned int ID, i;
+			char name[30];
+			unsigned short * speech;
+			unsigned short uspeech[256];
+			char * cSpeech;
+			pID = (unsigned int *)&pPacket[3];
+			ID = htonl(*pID);
+			memset(name, 0, 30);
+			strncpy(name, &pPacket[18], 30);
+			speech = (unsigned short *)&pPacket[48];
+			i=0;
+			memset(uspeech, 0, sizeof(unsigned short)*256);
+			while((speech[i]!=0)&&(i<255))
+			{
+				uspeech[i] = ntohs(speech[i]);
+				i++;
+			}
+			cSpeech = ole2char((LPOLESTR)uspeech);
+			printf("%s (%u) : %s\n", name, ID, cSpeech);
+			clean(cSpeech);
+		}
+	}
+
+	return 1;
+}
+
 int SendPacketHook(RegisterStates * regs, void * stacktop)
 {
 	char * pPacket = *((char **)stacktop);
 	unsigned int cmd;
-	//printf("in packet hook!\n");
-	//callibrations->ShowMessage(3, 0, "in packethook!\n");
 
-	/* debug -- check if hook is set correctly on some well-known packets */
 	if(pPacket!=NULL)
 	{
 		cmd = (unsigned int)(pPacket[0])&0xFF;
-		printf("pPacket[0] == %x\n", cmd);
-		if(cmd == 0xAD)
-			return 0;
+		printf("sent packet %x\n", cmd);
+		
+		/* tests */
+		//if(cmd == 0xAD)
+		//	return 0;
 		if(cmd == 0x02)
 			callibrations->ShowMessage(3, 0, "walk request");
 	}
@@ -78,16 +131,13 @@ int SendPacketHook(RegisterStates * regs, void * stacktop)
 
 void Client_constructor(Client * pThis)
 {
-	DWORD oldprotect;
-
 	_original_connect = (pConnect)SetImportHook("WSOCK32.dll", "connect", (void *)connect_hook);
 
 	if(SetRandomHook((unsigned int)(callibrations->SendPacket), 4, SendPacketHook)==0)
-	{
-		printf("failed to set hook!\n");
-	}
-	else
-		printf("hook set (%x)!\n", (unsigned int)(callibrations->SendPacket));
+		printf("failed to set sendpacket hook!\n");
+
+	if(SetVtblHook((void *)&(callibrations->NetworkObjectVtbl->HandlePacket), HandlePacketHook, 4))
+		printf("failed to set handlepacket hook!\n");
 
 	/*
 	_original_connection_loss_handler = callibrations->NetworkObjectVtbl->onConnectionLoss;
@@ -176,11 +226,6 @@ HRESULT STDMETHODCALLTYPE ShowYesNoGump(Client * pThis, BSTR question)
 
 	char * cquestion;
 	void * pgump;
-
-	Gump * p_gump;
-
-	unsigned int ync;
-	unsigned int sg;
 
 	if(_onYesCallback == 0)
 		_onYesCallback = (pYesNoGumpCallback)create_thiscall_callback((unsigned int)onyes);
@@ -284,8 +329,14 @@ UOCallibrations * GetCallibrations()
 	return callibrations;
 }
 
-HRESULT STDMETHODCALLTYPE GetPlayer(Client * pThis, Item * pPlayer)
+HRESULT STDMETHODCALLTYPE GetPlayer(Client * pThis, Item ** pPlayer)
 {
-	pPlayer = GetItemByOffset((unsigned int)(callibrations->Player));
+	(*pPlayer) = GetItemByOffset(*((unsigned int *)(callibrations->Player)));
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE GetItems(Client * pThis, void ** pItems)
+{
+	(*pItems) = (void *)create_itemlist(0);
 	return S_OK;
 }

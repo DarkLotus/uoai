@@ -3,16 +3,71 @@ library UOAI
 {
 	importlib("STDOLE2.TLB");
 
-	[uuid(2104F772-4791-4d80-B277-D026BEA08363), helpstring("Ultima Online In-Game Item")]
-	coclass Item
+	typedef struct
 	{
-		[default] interface ItemInterface;
+		short x;
+		short y;
+	} Point2D;
+
+	[uuid(FD02A988-A3E2-4ba2-A4E9-DF2CF90B2748), dual, oleautomation, hidden, nonextensible]
+	interface Item : IDispatch
+	{
+		[id(1), propget] HRESULT Id([out, retval] int * pID);
+		[id(1), propput] HRESULT Id([in] int ID);
+		[id(2), propget] HRESULT Type([out, retval] int * pType);
+		[id(2), propput] HRESULT Type([in] int Type);
+		[id(3), propget] HRESULT TypeIncrement([out, retval] int * pTypeIncrement);
+		[id(3), propput] HRESULT TypeIncrement([in] int TypeIncrement);
+		[id(4), propget] HRESULT Position([out, retval]Point2D * pPos);
+		[id(4), propput] HRESULT Position([in]Point2D pos);
+		[id(5), propget] HRESULT z([out, retval]int * pZ);
+		[id(5), propput] HRESULT z([in]int z);
+		[id(6), propget] HRESULT StackCount([out, retval] int * pCount);
+		[id(6), propput] HRESULT StackCount([in] int count);
+		[id(7), propget] HRESULT Color([out, retval] int * pColor);
+		[id(7), propput] HRESULT Color([in] int color);
+		[id(8), propget] HRESULT HighlightColor([out, retval] int * pHighlightColor);
+		[id(8), propput] HRESULT HighlightColor([in] int highlightcolor);
+		[id(9), propget] HRESULT Direction([out, retval] int * pDirection);
+		[id(9), propput] HRESULT Direction([in] int direction);
+		[id(10), propget] HRESULT Flags([out, retval] int * pFlags);
+		[id(10), propput] HRESULT Flags([in] int Flags);
+		[id(11), propget] HRESULT Name([out, retval] BSTR * pName);
+		[id(11), propput] HRESULT Name([in] BSTR strName);
+		[id(12), propget] HRESULT Properties([out, retval] BSTR * pProperties);
+		[id(12), propput] HRESULT Properties([in] BSTR strProperties);
+		[id(13)] HRESULT Click();
+		[id(14)] HRESULT DoubleClick();
+		[id(15)] HRESULT Drag();
+		[id(16), propget] HRESULT isMobile([out, retval] VARIANT_BOOL * bIsMobile);
+		[id(17), propget] HRESULT isContainer([out, retval] VARIANT_BOOL * bIsMobile);
+		[id(18), propget] HRESULT isMulti([out, retval] VARIANT_BOOL * bIsMulti);
 	}
 
-	[uuid(6913EDB4-C045-4788-AB1E-D18321BB2132), helpstring("Ultima Online In-Game Mobile")]
-	coclass Mobile
+	[uuid(1324EE7E-40FE-4db0-87AA-042D5499657E), dual, oleautomation, hidden, nonextensible]
+	interface ItemList : IDispatch
 	{
-		[default] interface MobileInterface;
+		[id(1), propget] HRESULT Count([out, retval] int * pCount);
+		[id(2)] HRESULT byID([in] int ID, [out, retval] Item ** pItem);
+		[id(3)] HRESULT byType([in] int Type, [out, retval] ItemList ** pItems);
+		[id(DISPID_VALUE), propget] HRESULT Items([in] int index, [out, retval] Item ** item);
+		[id(DISPID_NEWENUM), propget] HRESULT NewEnum([out, retval] IUnknown ** newenum);
+	}
+
+	[uuid(E38878DE-8A6A-48bc-89E8-307E6980021A), dual, oleautomation, hidden, nonextensible]
+	interface Container : Item
+	{
+		[id(19), propget] HRESULT IsOpen([out, retval] VARIANT_BOOL * bIsOpen);
+		[id(20)] HRESULT Open([out, retval] VARIANT_BOOL * bOpened);
+		[id(21), propget] HRESULT Content([out, retval] ItemList ** pContents);
+		//GUMP?
+		//CLOSE?
+	}
+
+	[uuid(4B760F4B-FA70-48a9-BAB2-BEB5E00226E2), dual, oleautomation, hidden, nonextensible]
+	interface Mobile : Item
+	{
+		[id(19)] HRESULT Say([in] int color, [in] int font, [in] BSTR speech);
 	}
 
 	[uuid(BFC0EE0A-2B29-41d9-83DA-4B6B61EF54F9), helpstring("Ultima Online Client")]
@@ -79,7 +134,8 @@ library UOAI
 		[id(2)] HRESULT Message([in] int color, [in] int font, [in] BSTR message);
 		[id(3)] HRESULT Bark([in] BSTR message);
 		[id(4)] HRESULT ShowYesNoGump([in] BSTR question);
-		[id(5), propget] HRESULT Player([out, retval] Item * pPlayer);
+		[id(5), propget] HRESULT Player([out, retval] Item ** pPlayer);
+		[id(6), propget] HRESULT Items([out, retval] ItemList ** pItems);
 	}
 
 	[uuid(EC60659C-611F-467c-B1F8-2CDB15BD257E), hidden, nonextensible]
@@ -92,49 +148,5 @@ library UOAI
 	interface COMInjectorInterface : IDispatch
 	{
 		[id(1)] HRESULT Initialize([in] BSTR window_class_name, [in] long parameter);
-	}
-	
-	typedef struct
-	{
-		short x;
-		short y;
-	} Point2D;
-
-	[uuid(FD02A988-A3E2-4ba2-A4E9-DF2CF90B2748), dual, oleautomation, hidden, nonextensible]
-	interface ItemInterface : IDispatch
-	{
-		[id(1), propget] HRESULT Id([out, retval] int * pID);
-		[id(1), propput] HRESULT Id([in] int ID);
-		[id(2), propget] HRESULT Type([out, retval] int * pType);
-		[id(2), propput] HRESULT Type([in] int Type);
-		[id(3), propget] HRESULT TypeIncrement([out, retval] int * pTypeIncrement);
-		[id(3), propput] HRESULT TypeIncrement([in] int TypeIncrement);
-		[id(4), propget] HRESULT Position([out, retval]Point2D * pPos);
-		[id(4), propput] HRESULT Position([in]Point2D pos);
-		[id(5), propget] HRESULT z([out, retval]int * pZ);
-		[id(5), propput] HRESULT z([in]int z);
-		[id(6), propget] HRESULT StackCount([out, retval] int * pCount);
-		[id(6), propput] HRESULT StackCount([in] int count);
-		[id(7), propget] HRESULT Color([out, retval] int * pColor);
-		[id(7), propput] HRESULT Color([in] int color);
-		[id(8), propget] HRESULT HighlightColor([out, retval] int * pHighlightColor);
-		[id(8), propput] HRESULT HighlightColor([in] int highlightcolor);
-		[id(9), propget] HRESULT Direction([out, retval] int * pDirection);
-		[id(9), propput] HRESULT Direction([in] int direction);
-		[id(10), propget] HRESULT Flags([out, retval] int * pFlags);
-		[id(10), propput] HRESULT Flags([in] int Flags);
-		[id(11), propget] HRESULT Name([out, retval] BSTR * pName);
-		[id(11), propput] HRESULT Name([in] BSTR strName);
-		[id(12), propget] HRESULT Properties([out, retval] BSTR * pProperties);
-		[id(12), propput] HRESULT Properties([in] BSTR strProperties);
-		[id(13)] HRESULT Click();
-		[id(14)] HRESULT DoubleClick();
-		[id(15)] HRESULT Drag();
-	}
-
-	[uuid(4B760F4B-FA70-48a9-BAB2-BEB5E00226E2), dual, oleautomation, hidden, nonextensible]
-	interface MobileInterface : ItemInterface
-	{
-		[id(16)] HRESULT Say([in] int color, [in] int font, [in] BSTR speech);
 	}
 }

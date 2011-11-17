@@ -3,15 +3,14 @@
 #include "Hooks.h"
 #include "BinaryTree.h"
 #include "Allocation.h"
+#include "UOItemList.h"
 
 extern UOCallibrations * callibrations;
 typedef void (__stdcall * pInitAOSString)(AOSString * stringobject, unsigned short * ustring);
 pInitAOSString InitAOSString = NULL;
 BinaryTree * items_by_id = NULL;
 
-
-
-IItemVtbl _ItemVtbl = {
+IItem _ItemVtbl = {
 	DEFAULT_DISPATCH_VTBL,
 	item_get_Id,
 	item_put_Id,
@@ -39,14 +38,54 @@ IItemVtbl _ItemVtbl = {
 	item_put_Properties,
 	item_Click,
 	item_DoubleClick,
-	item_Drag
+	item_Drag,
+	item_return_false,
+	item_return_false,
+	item_return_false
 };
+
+IContainer ContainerVtbl = {
+	DEFAULT_DISPATCH_VTBL,
+	item_get_Id,
+	item_put_Id,
+	item_get_Type,
+	item_put_Type,
+	item_get_TypeIncrement,
+	item_put_TypeIncrement,
+	item_get_Position,
+	item_put_Position,
+	item_get_z,
+	item_put_z,
+	item_get_StackCount,
+	item_put_StackCount,
+	item_get_Color,
+	item_put_Color,
+	item_get_HighlightColor,
+	item_put_HighlightColor,
+	item_get_Direction,
+	item_put_Direction,
+	item_get_Flags,
+	item_put_Flags,
+	item_get_Name,
+	item_put_Name,
+	item_get_Properties,
+	item_put_Properties,
+	item_Click,
+	item_DoubleClick,
+	item_Drag,
+	item_return_false,
+	item_return_true,
+	item_return_false,
+	container_IsOpen, 
+	container_Open, 
+	container_Content
+	};
 
 GUID * ItemGuids[3] = { (GUID *)&IID_IUnknown, (GUID *)&IID_IDispatch, (GUID *)&IID_IItem};
 
 COMClass ItemClass = {
 	"Item",								//name
-	(GUID *)&CLSID_Item,				//clsid
+	(GUID *)0,							//clsid
 	2,									//default_iid;
 	3,									//iids_count;
 	ItemGuids,							//iids
@@ -62,11 +101,68 @@ COMClass ItemClass = {
 	0									//instances (init to 0)
 };
 
+GUID * ContainerGuids[4] = { (GUID *)&IID_IUnknown, (GUID *)&IID_IDispatch, (GUID *)&IID_IItem, 
+								(GUID *)&IID_IContainer};
+
+COMClass ContainerClass = {
+	"Container",						//name
+	(GUID *)0,							//clsid
+	2,									//default_iid;
+	4,									//iids_count;
+	ContainerGuids,						//iids
+	(GUID *)NULL,						//events_iid
+	sizeof(Item),						//size
+	&ContainerVtbl,						//lpVtbl
+	(Structor)NULL,						//constructor
+	(Structor)NULL,						//destructor
+	0,									//typeinfo (init to 0)
+	0,									//unused
+	0,									//factory (init to 0)
+	0,									//activeobject (init to 0)
+	0									//instances (init to 0)
+};
+
+#define GET_CONTAINER(itemoffset) (*((unsigned int *)((itemoffset) + callibrations->ItemOffsets.oContainer)))
+ 
 Item * GetItemByID(unsigned int ID)
 {
 	Item * pNewItem = NULL;
 	
-	if(pNewItem = (Item *)ConstructObject(&ItemClass))
+	ClientItem * pClientItem;
+
+	int isContainer = 0;
+	int isMobile = 0;
+	int isMulti = 0;
+
+	unsigned int contents;
+
+	if(pClientItem = item_get_pointers(ID))
+	{
+		/*
+			a not so clean method to determine if an item is a container or not:
+			We check if Item->contents points to a valid contained item, i.e. we check
+			that item->contents[0]->container==item. The reason to do this is that 
+			Item->Contents is non-zero for non-container items and can in fact be zero
+			for container items if the container wasn't opened yet or the container is empty.
+			This works, but there is no guarantee that some exotic item class might store
+			data in Item->Contents which is not a pointer. In that case the Item->Contents->Container
+			check could potentially cause a segfault. Haven't seen it so far, and item->contents
+			always seems to contain the same value for non-container items. Still a better
+			check would be appreciated.
+		*/
+		contents = *(pClientItem->Contents);
+		if((contents!=0)&&(GET_CONTAINER(contents)!=pClientItem->self))
+			isContainer=0;
+		else//either empty or unopened container or one with valid contents
+			isContainer=1;
+	}
+
+	if(isContainer)
+		pNewItem = (Item *)ConstructObject(&ContainerClass);
+	else
+		pNewItem = (Item *)ConstructObject(&ItemClass);
+
+	if(pNewItem)
 		pNewItem->itemid = ID;
 
 	return pNewItem;
@@ -74,20 +170,15 @@ Item * GetItemByID(unsigned int ID)
 
 Item * GetItemByOffset(unsigned int offset)
 {
-	Item * pNewItem = NULL;
 	unsigned int * pID;
-	
-	if(pNewItem = (Item *)ConstructObject(&ItemClass))
+
+	if(offset!=0)
 	{
-		pNewItem->itemid = 0;
-		if(offset!=0)
-		{
-			pID = (unsigned int *)(offset + callibrations->ItemOffsets.oID);
-			pNewItem->itemid = (*pID);
-		}
+		pID = (unsigned int *)(offset + callibrations->ItemOffsets.oID);
+		return GetItemByID(*pID);
 	}
 
-	return pNewItem;
+	return NULL;
 }
 
 int ID_compare(unsigned int a, unsigned int b)
@@ -133,6 +224,7 @@ ClientItem * item_get_pointers(unsigned int ID)
 		{
 			toreturn = create(ClientItem);
 
+			toreturn->self = itemoffset;
 			toreturn->Color = (unsigned short *)(itemoffset + callibrations->ItemOffsets.oColor);
 			toreturn->Container = (unsigned int *)(itemoffset + callibrations->ItemOffsets.oContainer);
 			toreturn->Contents = (unsigned int *)(itemoffset + callibrations->ItemOffsets.oContents);
@@ -325,17 +417,25 @@ HRESULT __stdcall item_put_Flags(Item * pThis, int Flags)
 HRESULT __stdcall item_get_Name(Item * pThis, BSTR * pName)
 {
 	AOSString _str;
+	char * temp;
 
 	if(InitAOSString==NULL)
-		InitAOSString = (pInitAOSString)create_thiscall_wrapper((unsigned int)callibrations->InitString);
+		InitAOSString = (pInitAOSString)create_thiscall_wrapper((unsigned int)(callibrations->InitString));
 
 	memset(&_str, 0, sizeof(AOSString));
 	InitAOSString(&_str, callibrations->DefaultNameString);
-	callibrations->GetName(pThis->itemid, &_str, 1, 1);
+	callibrations->GetName(pThis->itemid, &_str, 0, 1);
 	if(_str.pString)
+	{
+		temp = ole2char((LPOLESTR)_str.pString);
+		printf("name -> %s\n", temp);
+		clean(temp);
 		(*pName) = SysAllocString((const OLECHAR *)_str.pString);
+	}
 	else
+	{
 		(*pName) = SysAllocString(L"");
+	}
 
 	return S_OK;
 }
@@ -351,11 +451,11 @@ HRESULT __stdcall item_get_Properties(Item * pThis, BSTR * pProperties)
 	AOSString _str;
 
 	if(InitAOSString==NULL)
-		InitAOSString = (pInitAOSString)create_thiscall_wrapper((unsigned int)callibrations->InitString);
+		InitAOSString = (pInitAOSString)create_thiscall_wrapper((unsigned int)(callibrations->InitString));
 
 	memset(&_str, 0, sizeof(AOSString));
 	InitAOSString(&_str, callibrations->DefaultPropertiesString);
-	callibrations->GetProperties(pThis->itemid, &_str, 1, 1);
+	callibrations->GetProperties(pThis->itemid, &_str, 0, 1);
 	if(_str.pString)
 		(*pProperties) = SysAllocString((const OLECHAR *)_str.pString);
 	else
@@ -382,5 +482,57 @@ HRESULT __stdcall item_DoubleClick(Item * pThis)
 
 HRESULT __stdcall item_Drag(Item * pThis)
 {
+	return S_OK;
+}
+
+HRESULT __stdcall item_return_false(Item * pThis, VARIANT_BOOL * bResult)
+{
+	(*bResult) = VARIANT_FALSE;
+	return S_OK;
+}
+
+HRESULT __stdcall item_return_true(Item * pThis, VARIANT_BOOL * bResult)
+{
+	(*bResult) = VARIANT_TRUE;
+	return S_OK;
+}
+
+HRESULT __stdcall container_IsOpen(Item * pThis, VARIANT_BOOL * bIsOpen)
+{
+	ClientItem * pci;
+	(*bIsOpen)=VARIANT_FALSE;
+	if(pci=item_get_pointers(pThis->itemid))
+	{
+		if((*(pci->Gump))!=0)
+			(*bIsOpen) = VARIANT_TRUE;
+	}
+	return S_OK;
+}
+
+HRESULT __stdcall container_Open(Item * pThis, VARIANT_BOOL * bOpened)
+{
+	unsigned int i;
+	container_IsOpen(pThis, bOpened);
+	
+	if((*bOpened)==VARIANT_TRUE)
+		return S_OK;
+
+	item_DoubleClick(pThis);
+
+	/* TODO: wait for gump open? */
+	i=0;
+	while(((*bOpened)==VARIANT_FALSE)&&(i<10))
+	{
+		callibrations->GeneralPurposeFunction(1);
+		container_IsOpen(pThis, bOpened);
+		i++;
+	}
+
+	return S_OK;
+}
+
+HRESULT __stdcall container_Content(Item * pThis, void ** pContents)
+{
+	(*pContents) = (void *)create_itemlist(pThis->itemid);
 	return S_OK;
 }

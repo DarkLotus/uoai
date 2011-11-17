@@ -119,7 +119,7 @@ typedef struct UOCallibrationsStruct
 	unsigned int * LastObjectID;
 	unsigned int * LastObjectType;
 	pFindItemByID FindItemByID;
-	Item * Player;
+	Item ** Player;
 	Item ** Items;
 	Gump ** Gumps;
 	unsigned int oGumpItem;

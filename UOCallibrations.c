@@ -259,6 +259,10 @@ LinkedList * GetFieldOffsets(asm_function * curfunc, int search_sub_procedures, 
 	BinaryTree * offsets;
 	BinaryTreeNode * backup;
 
+	BinaryTree * subfuncoffsets;
+	BinaryTreeEnum * btenum;
+	unsigned int curdisp;
+
 	x86_insn_t * curinsn;
 	insn_mask * call_relative, * call_relativeb;
 	insn_mask * mov_expression;
@@ -310,6 +314,8 @@ LinkedList * GetFieldOffsets(asm_function * curfunc, int search_sub_procedures, 
 		{
 			if(curfuncb=disasm_function(targetaddr))
 			{
+				subfuncoffsets=BT_create((BTCompare)unsigned_int_compare);
+
 				while(curinsn=find_insn(curfuncb, mov_expression, 0, 0))
 				{
 					//mov [esi+0xNN], ... or mov [edi+0xNN], ...
@@ -317,12 +323,22 @@ LinkedList * GetFieldOffsets(asm_function * curfunc, int search_sub_procedures, 
 					//a lower limit for 0xNN can be specified
 					if(((curinsn->operands->op.data.expression.base.id==8)||(curinsn->operands->op.data.expression.base.id==7))&&(curinsn->operands->op.data.expression.disp>=minimaloffset))
 					{
-						if(BT_find(offsets, (void *)curinsn->operands->op.data.expression.disp)==0)
-							BT_insert(offsets, (void *)curinsn->operands->op.data.expression.disp, (void *)curinsn->operands->op.data.expression.disp);
+						if(BT_find(subfuncoffsets, (void *)curinsn->operands->op.data.expression.disp)==0)
+							BT_insert(subfuncoffsets, (void *)curinsn->operands->op.data.expression.disp, (void *)curinsn->operands->op.data.expression.disp);
 					}
 				}
 
 				delete_asm_function(curfuncb);
+
+				if(subfuncoffsets->itemcount > 0)
+				{
+					btenum = BT_newenum(subfuncoffsets);
+					while(curdisp = (unsigned int)BT_next(btenum))
+						BT_insert(offsets, (void *)curdisp, (void *)curdisp);
+					BT_enumdelete(btenum);
+				}
+
+				BT_delete(subfuncoffsets);
 			}
 		}
 	}
@@ -568,11 +584,13 @@ int AOSPropertiesCallibrations(Stream ** clientstream, Process * clientprocess, 
 							//						-> call DoGetProperties, add esp, 0x10	//ccall_stacksize_10h
 							if(curinsn=find_insn(curfuncb, add_esp_10h, 0, 0))
 							{
+								curfuncb->backwards = 1;
 								if(curinsn=find_insn(curfuncb, call_relative, 0, 0))
 								{
 									toreturn++;//5
 									callibrations->GetProperties=(pGetProperties)insn_get_target(curinsn, 0);
 								}
+								curfuncb->backwards = 0;
 							}							
 
 							delete_asm_function(curfuncb);
@@ -1842,15 +1860,25 @@ int NewItemPacketCallibrations(Stream ** clientstream, Process * clientprocess, 
 			{
 				if(curfunc=disasm_function(targetaddr))
 				{				
-					offsets=GetFieldOffsets(curfunc, 1, 4);
+					offsets=GetFieldOffsets(curfunc, 1, 0x24);
 
 					i=0;
 					fields=(unsigned int *)&(callibrations->ItemOffsets);
 
-					while((curoffset=(unsigned int)LL_dequeue(offsets))&&(i<19))
+					/* X, Y, Z, ... */
+					while((i<10)&&(curoffset=(unsigned int)LL_dequeue(offsets)))
 						fields[i++]=(unsigned int)curoffset;
 
-					if(i==19)
+					/* find ID field */
+					while((curoffset=(unsigned int)LL_dequeue(offsets))&&(curoffset!=callibrations->ItemOffsets.oItemID))
+						;
+					fields[i++]=(unsigned int)curoffset;
+
+					/* everything after ID field */
+					while((i<15)&&(curoffset=(unsigned int)LL_dequeue(offsets)))
+						fields[i++]=(unsigned int)curoffset;
+
+					if(i==15)
 						toreturn=1;
 						
 					LL_delete(offsets);
@@ -2289,6 +2317,7 @@ int SendPacketCallibrations(Stream ** clientstream, Process * clientprocess, UOC
 	unsigned int i;
 
 	BinaryTreeNode * backup;
+	unsigned int backupaddress;
 
 	insn_mask * call_relative, * call_relativeb;
 	insn_mask * shl_reg_1Fh;
@@ -2382,12 +2411,21 @@ int SendPacketCallibrations(Stream ** clientstream, Process * clientprocess, UOC
 				toreturn++;//1
 				callibrations->EncryptionPatchAddresses[2]=curinsn->addr;
 				callibrations->EncryptionPatchTargets[2]=insn_get_target(curinsn, 0);
+
+				/* already patched? -> we didnt get the whole function as the jmp was followed! */
+				if(curinsn->type = insn_jmp)
+				{
+					backupaddress = curinsn->addr + curinsn->size;
+					delete_asm_function(curfuncb);
+					curfuncb = disasm_function(backupaddress);
+				}
 	
 				//<- find shl esi << 0x1F (either here or in the first call)
 				backup=curfuncb->insn_enum->curnode;
 				if((curinsn=find_insn(curfuncb, shl_reg_1Fh, 0, 0))==0)
 				{
 					curfuncb->insn_enum->curnode=backup;
+					
 					if(curinsn=find_insn(curfuncb, call_relative, 0, 0))
 					{
 						curaddr=insn_get_target(curinsn, 0);
@@ -3145,7 +3183,7 @@ int LastObjectMacroCallibrations(Stream ** clientstream, Process * clientprocess
 				if(curinsn=find_insn(curfunc, mov_reg_var, &temp, 0))
 				{
 					toreturn++;//3
-					callibrations->Player=(Item *)insn_get_target(curinsn, 1);
+					callibrations->Player=(Item **)insn_get_target(curinsn, 1);
 				}
 	
 				//cmp reg, expression -> oItemID
@@ -4205,7 +4243,7 @@ int CallibrateClient(unsigned int pid, UOCallibrations * callibrations)
 
 			if(toreturn)
 			{//callibrations depending on the packet-switch/packet-switch offsets (= callibrations from the client's packethandlers)
-				toreturn&=NewItemPacketCallibrations(clientstream, clientprocess, callibrations);
+				//toreturn&=NewItemPacketCallibrations(clientstream, clientprocess, callibrations);
 				toreturn&=OtherPacketCallibrations(clientstream, clientprocess, callibrations);
 			}
 			
@@ -4217,7 +4255,10 @@ int CallibrateClient(unsigned int pid, UOCallibrations * callibrations)
 		if(toreturn&=MacroCallibrations(winmain, callibrations))
 		{//callibrations from specific macros
 			if(toreturn&=LastObjectMacroCallibrations(clientstream, clientprocess, callibrations))
+			{
+				toreturn&=NewItemPacketCallibrations(clientstream, clientprocess, callibrations);//moved here, needs oItemID
 				toreturn&=SendPacketCallibrations(clientstream, clientprocess, callibrations);//lastobject macro gives SendPacket function, for which we still need to callibrate hook and encryption-patch addresses
+			}
 
 			toreturn&=LastSkillMacroCallibrations(clientstream, clientprocess, callibrations);
 			toreturn&=LastSpellMacroCallibrations(clientstream, clientprocess, callibrations);
@@ -4239,7 +4280,7 @@ int CallibrateClient(unsigned int pid, UOCallibrations * callibrations)
 		//		- a multiclient patch is already applied
 		//		- or this is an unknown (badly callibrated) client <- but then typically other callibrations should fail too
 		MultiClientPatchingCallibrations(winmain, callibrations);
-
+	
 		delete_asm_function(winmain);
 	}
 
