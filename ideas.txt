@@ -1,0 +1,79 @@
+This is a scratchpad for ideas that might be implemented as part of the UOAI project someday.
+- next...
+	- packet handler/interface generator
+	- map files/art/cliloc list?
+	- storage (dispatchonly <-> UOAI database)
+	- interface <-> class redesign
+	- clientlist/COMInjector 
+		=> stored settings?
+		=> login profiles?
+	- client class
+		<- waitforevent
+		<- version
+		<- ...
+	- a. finish:
+		- item
+		- mobile
+		- multi
+		- container
+		- playermobile
+		- gump
+		- gumplist
+		- specific gumps:
+			> genericgump
+				< genericgumpelement
+			> buttongump
+			> input control gump
+			> 
+	- Login?
+	- context menus
+	- art override option (mulfile-access function callibration -> add custom types)	
+	- scriptinghost+zipped scripts
+	- plugins
+- UOToolbox
+	- UOAI client launcher
+		<- login profiles
+		<- browse for shards on online free shard listings (browse by rating etc.)
+		<- optional fully automated login: 
+			-> store username/password + shard selection + character selection
+			on a profile
+	- trayicon + context menu
+		<- switch client profiles at runtime (automated logout + relogin)
+	- client-side GUI
+		<- from trayicon or ingame a 'UOAI menu gump can be shown'
+	- messages
+		<- per-user/shard combination -> messaging
+	- market
+		<- per-user/shard -> online shop
+			-> list items for sale
+			-> either 'auction' or 'fixed price'
+			-> messaging system to sent each other messages
+	- MAP
+		<- multi-client/shard support
+		<- popup seperate map window (much like automap)
+		<- waypoints
+		<- regions
+			- named regions
+			- extra region info
+				<- f.e. pathfind info : region risk level, isRoad, ...
+		<- multi-cache per shard
+		<- integration of market
+		<- integration with pathfinder (show paths etc.)
+	- user/shard <-> facebook credential coupling
+		-> store profiles online => login with facebook credentials, then pick login profile
+		-> store markets coupled to credentials
+		-> ...
+	- pathfinder
+		-> find tiles
+		-> find waypoint
+		-> gating, runing, runebooks, recall support...
+	- razor like macroing?
+	- house management?
+		- named containers/typed containers, etc.
+		- house menu management
+	- hotkey management
+	- script management
+Website Generator
+	- store website database locally
+	- website representation => dump
+	=> no CM needed, local output generation
