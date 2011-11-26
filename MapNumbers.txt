@@ -1,0 +1,11 @@
+&~0x7FFFFFFF == isMobile
+
+typedef enum
+{
+	Felluca=0,
+	Trammel=1,
+	Ilshenar=2,
+	Malas=3,
+	Tokuno=4,
+	TerMur=5
+} Maps;

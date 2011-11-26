@@ -134,6 +134,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="C_Tokenizer.c" />
     <ClCompile Include="Hooks.c" />
     <ClCompile Include="libdisasm\ia32_implicit.c" />
     <ClCompile Include="libdisasm\ia32_insn.c" />
@@ -164,6 +165,8 @@
     <ClCompile Include="Injection.c" />
     <ClCompile Include="LinkedList.c" />
     <ClCompile Include="OnInjection.c" />
+    <ClCompile Include="Packets.c" />
+    <ClCompile Include="PacketsTable.c" />
     <ClCompile Include="PE.c" />
     <ClCompile Include="Process.c" />
     <ClCompile Include="Streams.c" />
@@ -218,6 +221,8 @@
     <ClInclude Include="Injection.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="OnInjection.h" />
+    <ClInclude Include="PacketDefs.h" />
+    <ClInclude Include="Packets.h" />
     <ClInclude Include="PE.h" />
     <ClInclude Include="Process.h" />
     <ClInclude Include="resource.h" />

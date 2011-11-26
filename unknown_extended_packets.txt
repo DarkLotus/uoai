@@ -1,0 +1,167 @@
+0xBF packets
+	- 2, 3?			<- notifications, no data
+	- 0xF?			<- not handled by client
+	- 0xD?			<- not handled by client
+	- 0x12			<- not handled by client
+	- 0x16, 0x17		<- notifications, no data
+	- 0x1D, 0x1E, 0x1F, 0x20<- 0x1D = 'damage with kind (direct, physical, fire, cold, poison, energy)'
+				<- 0x20
+				<- other ones are not handled by client
+	- 0x23(, 0x24)
+
+Clientside BF
+	-> (subcmd-1) <= 0x2A
+
+
+//2
+	DWORD unkn;
+
+//3
+	unknown
+	
+//16
+	ChangeGumpProps? (topmostgump only)
+		DWORD ActionNumber;//->calls vtbl directly
+			           //-> 12 cases!
+		DWORD GumpID;//(compared with ->oID)
+
+//17
+	//no idea yet
+	//starts with byte, dword
+	//first byte is compared to 1, 3, 4 and 5
+	//1, 3, 4
+		-> read another byte
+	//5
+		-> dont
+	
+
+//1D
+	2 IDs (dwords) -> passed to finditem!
+	
+//20
+	DWORD <- itemID (passed to finditiem)
+	Byte
+	Word
+	Short
+	Short
+
+	
+//27
+	Dword
+	?
+	Byte
+	UInt
+	-> only Dword seems to be used (ID)
+
+//29	<= some status dump
+	<= there's a lot of sprintf-like stuff going on,
+	<= so it should be possible to get exact details
+	->?
+	-> DWORD
+	-< switched that dword // 4 cases
+	-<	string name
+		uint account id
+		byte	x
+		byte	y
+		dword	z?
+		uint	bodytype	
+		uint	notoriety
+		uint	fame
+		uint	karma
+		uint	Tighting Points
+		byte	Gender
+		uint	BaseStr
+		uint	BaseDex
+		uint	BaseInt
+		uint	MagicStr
+		uint	MagicDex
+		uint	MagicInt
+		uint	EquipStr
+		uint	EquipDex
+		uint	EquipInt
+		uint	TotalStr
+		uint	TotalDex
+		uint	TotalInt
+		uint	10sHPGain
+		uint	10sSTAMGain
+		uint	10sMANAGain
+		uint	ManaCostMod
+		uint	TOHID Bonus
+		TOHIT Defense BONus <- ????
+		Swing Speed
+		Damage Mod
+	-<	1 skills		
+	-< 	2
+		=> byte count
+		=> list(count)
+			< NatDmg
+			< CurDmg
+		(order: direct, physical, fire, cold, 		poison, energy)	
+	-< 	3
+		Resistances
+		
+//2A
+	//2 bytes
+	//constructs a 'race change' gump
+//2B
+	//word ID (strange, first time an id is that short)
+	//byte
+	//byte
+	-> finds item (so definitely id)
+	-> updates fields 0x204 and 0x208 on item
+	-> bytes seem to be treated as coordinates
+
+
+//sent by client:
+//F	//Byte : 0xA
+	//Int
+//12 	//Short + Int (never sent, writer exists but isnt referenced)
+
+
+	
+<-------------
+
+00 - db 0            ; DATA XREF: sub_479440+70r
+01 - db    1		<- notifications, but no data
+02 - db    2		<- notifications, but no data
+03 - db    3
+04 - db 18h
+05 - db    4
+06 - db  18h
+07 - db    5
+08 - db  18h
+09 - db  18h
+0A - db  18h
+0B - db  18h
+0C - db  18h
+0D - db  18h
+0E - db  18h
+0F - db    6
+10 - db    7
+11 - db  18h
+12 - db  18h
+13 - db    8
+14 - db  18h
+15 - db    9		<- notifications, no data
+16 - db  0Ah		<- notifications, no data
+17 - db  0Bh
+18 - db  0Ch
+19 - db  18h
+1A - db  0Dh
+1B - db  18h
+1C - db  0Eh		<- 0x1D
+1D - db  18h
+1E - db  18h
+1F - db  0Fh		<- 0x20
+20 - db  10h
+21 - db  11h
+22 - db  18h
+23 - db  18h
+24 - db  12h
+25 - db  13h
+26 - db  14h
+27 - db  18h
+28 - db  15h
+29 - db  16h
+2A - db  17h
+.text:0047BB37                 db  90h ; É

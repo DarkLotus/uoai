@@ -144,6 +144,15 @@
     <ClCompile Include="UOItemList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Packets.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketsTable.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C_Tokenizer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="UOAI.idl">
@@ -290,6 +299,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UOItemList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Packets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

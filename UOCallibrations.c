@@ -4209,6 +4209,25 @@ asm_function * CallibrateWinMain(Stream ** clientstream, Process * clientprocess
 	return toreturn;
 }
 
+int DumpPacketSwitchOffsets(Stream ** clientstream, UOCallibrations * callibrations)
+{
+	unsigned int targetaddr, packetnumber;
+	if((callibrations->PacketSwitch_indices!=0)&&(callibrations->PacketSwitch_offsets!=0))
+	{
+		for(packetnumber = 0; packetnumber<0xEC; packetnumber++)
+		{
+			SSetPos(clientstream, ((unsigned int)callibrations->PacketSwitch_indices)+packetnumber);
+			targetaddr=(unsigned int)SReadByte(clientstream);
+			SSetPos(clientstream, ((unsigned int)callibrations->PacketSwitch_offsets) + 4*targetaddr);
+			targetaddr=(unsigned int)SReadUInt(clientstream);
+			callibrations->packethandlers[packetnumber+0xB] = targetaddr;
+		}
+		return 1;
+	}
+	else
+		return 0;
+}
+
 int CallibrateClient(unsigned int pid, UOCallibrations * callibrations)
 {
 	Process * clientprocess;
@@ -4282,6 +4301,10 @@ int CallibrateClient(unsigned int pid, UOCallibrations * callibrations)
 		MultiClientPatchingCallibrations(winmain, callibrations);
 	
 		delete_asm_function(winmain);
+
+		//dump packetswitch offsets (unused, so doesn't generate an error)
+		memset(callibrations->packethandlers, 0, sizeof(unsigned int)*256);
+		DumpPacketSwitchOffsets(clientstream, callibrations);
 	}
 
 	//cleanup
