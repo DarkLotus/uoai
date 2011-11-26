@@ -290,6 +290,7 @@ COMCALL LaunchClient(UOAI * pThis, IUnknown ** client, VARIANT_BOOL bApplyMultiC
 	return S_OK;
 }
 
+extern void autogenerate_packet_code();
 void testfunc()
 {
 	UOCallibrations callibs;
@@ -310,9 +311,29 @@ void testfunc()
 	//list all client windows
 	clientwindows=FindWindowByClassName("Ultima Online");
 
+	autogenerate_packet_code();
+	getchar();
+
 	//windowlist -> tree
 	while(curwin=(Window *)LL_pop(clientwindows))
 	{
-		CallibrateClient(curwin->pid, &callibs);
+		if(CallibrateClient(curwin->pid, &callibs))
+		{
+			//dump packet handlers to file
+			unsigned int i, j;
+			unsigned int sizeoffset;
+			FILE * packethandlers = fopen("packethandlers.csv", "a+");
+			for(i=0, j=0; i<256; i++)
+			{
+				if( (callibs.packethandlers[i]!=0)
+					&& (callibs.packethandlers[i]!=callibs.packethandlers[0xF]) )//assuming 0xF packet maps to 'default:' label
+				{
+					sizeoffset = ((unsigned int)callibs.Packets) + i*3*4;
+					fprintf(packethandlers, "%u;0x%x;0x%x;0x%x\n", j++, i, callibs.packethandlers[i], sizeoffset);
+				}
+			}
+			fprintf(packethandlers, "\n");
+			fclose(packethandlers);
+		}
 	}
 }

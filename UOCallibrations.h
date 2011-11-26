@@ -238,6 +238,9 @@ typedef struct UOCallibrationsStruct
 
 	// callibrated from BarkGumpConstructor
 	pShowGump ShowGump;
+
+	// offsets from packet switch
+	unsigned int packethandlers[256];
 } UOCallibrations;
 
 int CallibrateClient(unsigned int pid, UOCallibrations * callibrations);

@@ -79,6 +79,11 @@ int HandlePacketHook(RegisterStates * regs, void * stacktop)
 		cmd = (unsigned int)(pPacket[0])&0xFF;
 		printf("received packet %x\n", cmd);
 
+		if( cmd == 0x4F)
+		{
+			pPacket[1] = 0;
+		}
+
 		/* test */
 		if(cmd == 0xAE)
 		{

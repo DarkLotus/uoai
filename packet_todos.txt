@@ -1,0 +1,41 @@
+// packet 0 -> unknown byte = race??? or is race missing in this version
+// packet 1 -> implement manually
+// packet 22 -> implement manually (resynchronize)
+// packet 11 -> implement packet manually
+// packet 1A -> NewItem -> manually
+// packet 8 -> DropRequest (6.0.17 and higher clients use different layout!)
+// note that in character creation (packet 0) and character selection
+//	the parameter array contains some intersting things:
+//	parameter[2],[3],[4],[5] contain feature flags
+//	parameter[14] = profession
+//	rest is unkonwn (0)
+// packet 6F -> SecureTrade -> custom implementation
+// packet 9b -> helprequest -> content completely unknown
+// packet a4 -> systeminfo -> skipped
+// packet a7 -> ignored
+// packet ad -> can have keywords!!! ('encoded' in runuo)
+// packet b1 -> genericgumpresponse -> too complicated to automate
+// packet bb -> skipped (ultima messenger/acountid/...?...)
+// packet bf::10h -> properties packet -> implement custom
+// packet bf::21h -> NO DATA
+// packet bf::9h -> NO DATA (disarm)
+// packet bf::Ah -> no data
+// packet D7 (encoded commands) -> ignored for now
+// 
+
+
+
+public static int[] m_ValidAnimations = new int[]
+			{
+				6, 21, 32, 33,
+				100, 101, 102,
+				103, 104, 105,
+				106, 107, 108,
+				109, 110, 111,
+				112, 113, 114,
+				115, 116, 117,
+				118, 119, 120,
+				121, 123, 124,
+				125, 126, 127,
+				128
+			};
