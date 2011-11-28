@@ -144,12 +144,6 @@
     <ClCompile Include="UOItemList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Packets.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PacketsTable.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="C_Tokenizer.c">
       <Filter>Source Files</Filter>
     </ClCompile>

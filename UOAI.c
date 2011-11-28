@@ -309,10 +309,11 @@ void testfunc()
 	memset(&callibs, 0, sizeof(UOCallibrations));*/
 
 	//list all client windows
-	clientwindows=FindWindowByClassName("Ultima Online");
 
 	autogenerate_packet_code();
 	getchar();
+
+	clientwindows=FindWindowByClassName("Ultima Online");
 
 	//windowlist -> tree
 	while(curwin=(Window *)LL_pop(clientwindows))
