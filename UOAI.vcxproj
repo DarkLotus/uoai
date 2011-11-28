@@ -165,8 +165,6 @@
     <ClCompile Include="Injection.c" />
     <ClCompile Include="LinkedList.c" />
     <ClCompile Include="OnInjection.c" />
-    <ClCompile Include="Packets.c" />
-    <ClCompile Include="PacketsTable.c" />
     <ClCompile Include="PE.c" />
     <ClCompile Include="Process.c" />
     <ClCompile Include="Streams.c" />

@@ -218,7 +218,7 @@ typedef struct packet_3_struct
 	MessageTypes TextType;//type(unsigned char)
 	unsigned short Color;
 	Fonts Font;//type(unsigned short)
-	char * Message;//size(length-8)
+	char * Message;
 } SpeechRequest;
 
 typedef struct packet_5_struct
@@ -245,7 +245,7 @@ typedef struct packet_9_struct
 typedef struct packet_12_struct
 {
 	unsigned char Command;
-	unsigned char * Parameters;//size(length-4)
+	unsigned char * Parameters;
 } TextCommand;
 
 typedef struct packet_13_struct
@@ -438,7 +438,7 @@ typedef enum
 	WriteProfile
 } ProfileQueryTypes;
 
-typedef struct 
+typedef struct client_packet_b8_struct
 {
 	ProfileQueryTypes Type;//Type(unsigned char)
 	unsigned int ID;
@@ -447,7 +447,7 @@ typedef struct
 	unsigned short * ProfileText;//Size(ProfileLength)
 } ProfileQuery;
 
-typedef struct
+typedef struct server_packet_b8_struct
 {
 	unsigned int ID;
 	char * Name;//NullTerminated()
@@ -455,18 +455,9 @@ typedef struct
 	unsigned short * ProfileText;//NullTerminated()
 } ProfileUpdate;
 
-typedef struct packet_b8_struct
-{
-	union
-	{
-		ProfileQuery ClientVersion;
-		ProfileUpdate ServerVersion;
-	} u;
-} ProfilePacket;
-
 typedef struct packet_bd_struct
 {
-	char * versionstring;//Size(Length-3)
+	char * versionstring;
 } ClientVersion;
 
 typedef enum

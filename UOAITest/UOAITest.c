@@ -101,12 +101,10 @@ int main()
 
 	if(hmod=LoadLibrary("UOAI.dll"))
 	{
-#if 0
 		if(testfunc = (void (*)())GetProcAddress(hmod, "testfunc"))
 		{
 			testfunc();
 		}
-#endif
 
 		if(unregsvr=(pDllRegisterServer)GetProcAddress(hmod, "DllUnregisterServer"))
 		{
